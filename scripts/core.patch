@@ -1,0 +1,12 @@
+23c23
+<     ScreenId(..), ScreenDetail(..), XState(..),
+---
+>     ScreenDetail(..), XState(..),
+109c109
+< type WindowSet   = StackSet  WorkspaceId (Layout Window) Window ScreenId ScreenDetail
+---
+> type WindowSet   = StackSet  WorkspaceId (Layout Window) Window ScreenDetail
+115,117d114
+< -- | Physical screen indices
+< newtype ScreenId    = S Int deriving (Eq,Ord,Show,Read,Enum,Num,Integral,Real)
+< 
