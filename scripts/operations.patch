@@ -1,18 +1,18 @@
-131,132c131,132
+130,131c130,131
 <                     >>= W.filter (`M.notMember` W.floating ws)
 <                     >>= W.filter (`notElem` vis)
 ---
 >                     >>= W.filterStack (`M.notMember` W.floating ws)
 >                     >>= W.filterStack (`notElem` vis)
-376c376
+374c374
 < screenWorkspace :: ScreenId -> X (Maybe WorkspaceId)
 ---
 > screenWorkspace :: W.ScreenId -> X (Maybe WorkspaceId)
-424c424
+426c426
 < floatLocation :: Window -> X (ScreenId, W.RationalRect)
 ---
 > floatLocation :: Window -> X (W.ScreenId, W.RationalRect)
-442c442
+444c444
 <             -> X (Maybe (W.Screen WorkspaceId (Layout Window) Window ScreenId ScreenDetail))
 ---
 >             -> X (Maybe (W.Screen WorkspaceId (Layout Window) Window ScreenDetail))

@@ -93,7 +93,7 @@ CAMLP4OPTIONS:=
 PP:=-pp "$(CAMLP4BIN)$(CAMLP4)o -I $(CAMLLIB) -I . $(COQSRCLIBS) $(CAMLP4EXTEND) $(GRAMMARS) $(CAMLP4OPTIONS) -impl"
 
 BUILDDIR:=build
-XMONADDIR:=$(BUILDDIR)/xmonad-0.9.2/
+XMONADDIR:=$(BUILDDIR)/xmonad-0.10/
 
 ###################################
 #                                 #
@@ -194,16 +194,16 @@ install:
 clean:
 	rm -f $(CMOFILES) $(CMIFILES) $(CMXFILES) $(CMXSFILES) $(OFILES) $(VOFILES) $(VIFILES) $(GFILES) $(HSFILE) $(MLFILES:.ml=.cmo) $(MLFILES:.ml=.cmx) *~
 	rm -f all.ps all-gal.ps all.pdf all-gal.pdf all.glob $(VFILES:.v=.glob) $(HTMLFILES) $(GHTMLFILES) $(VFILES:.v=.tex) $(VFILES:.v=.g.tex) $(VFILES:.v=.v.d)
-	- rm -rf html $(BUILDDIR)
+	rm -rf html $(BUILDDIR)
 
 archclean:
 	rm -f *.cmx *.o
 
 patched_xmonad:
 	mkdir -p $(BUILDDIR)
-	curl http://hackage.haskell.org/packages/archive/xmonad/0.9.2/xmonad-0.9.2.tar.gz\
-	   -o $(BUILDDIR)/xmonad-0.9.2.tar.gz
-	cd $(BUILDDIR); tar zxf xmonad-0.9.2.tar.gz
+	curl http://hackage.haskell.org/packages/archive/xmonad/0.10/xmonad-0.10.tar.gz\
+	   -o $(BUILDDIR)/xmonad-0.10.tar.gz
+	cd $(BUILDDIR); tar zxf xmonad-0.10.tar.gz
 	patch $(XMONADDIR)/xmonad.cabal -i scripts/cabal.patch
 	patch $(XMONADDIR)/XMonad/Core.hs -i scripts/core.patch
 	patch $(XMONADDIR)/XMonad/Operations.hs -i scripts/operations.patch
@@ -232,9 +232,6 @@ printenv:
 	@echo CAMLC =	$(CAMLC)
 	@echo CAMLOPTC =	$(CAMLOPTC)
 	@echo CAMLP4LIB =	$(CAMLP4LIB)
-
--include $(VFILES:.v=.v.d)
-.SECONDARY: $(VFILES:.v=.v.d)
 
 # WARNING
 #
