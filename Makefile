@@ -199,17 +199,20 @@ clean:
 archclean:
 	rm -f *.cmx *.o
 
-patched_xmonad:
+$(BUILDDIR)/xmonad-0.10.tar.gz:
 	mkdir -p $(BUILDDIR)
 	curl http://hackage.haskell.org/packages/archive/xmonad/0.10/xmonad-0.10.tar.gz\
 	   -o $(BUILDDIR)/xmonad-0.10.tar.gz
+
+$(BUILDDIR)/xmonad-0.10/xmonad.cabal: $(BUILDDIR)/xmonad-0.10.tar.gz
+	mkdir -p $(BUILDDIR)
 	cd $(BUILDDIR); tar zxf xmonad-0.10.tar.gz
 	patch $(XMONADDIR)/xmonad.cabal -i scripts/cabal.patch
 	patch $(XMONADDIR)/XMonad/Core.hs -i scripts/core.patch
 	patch $(XMONADDIR)/XMonad/Operations.hs -i scripts/operations.patch
 	patch $(XMONADDIR)/tests/Properties.hs -i scripts/properties.patch
 
-extraction: patched_xmonad
+extraction: $(BUILDDIR)/xmonad-0.10/xmonad.cabal
 	mkdir -p $(BUILDDIR)
 	$(MAKE) all
 	$(COQC) $(COQFLAGS) $(EXTRACTION_FILE)
