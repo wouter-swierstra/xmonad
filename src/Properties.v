@@ -3,7 +3,7 @@ Require Import StackSet.
 Require Import Arith.
 Require Import Sorting.Permutation.
 
-Variable (i l a sd : Set).
+Variable (i l a b sd : Set).
 
 Lemma focusUpDown' (s : stack a) : focusDown' (focusUp' s) = s.
   Proof.
@@ -244,7 +244,7 @@ Lemma NotInApp (x : a) (xs ys : list a) : ~In x xs -> ~In x ys -> ~In x (xs ++ y
   apply H1.  
   Admitted.
 
-Lemma NoDupApp (xs ys : list a) (H : NoDup (xs ++ ys)) : NoDup (ys ++ xs).
+Lemma NoDupAppAss (xs ys : list a) (H : NoDup (xs ++ ys)) : NoDup (ys ++ xs).
   Proof.
    induction ys.
    rewrite app_nil_r in H; assumption.
