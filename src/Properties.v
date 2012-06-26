@@ -313,9 +313,8 @@ Theorem prop_empty_I (m : l) (wids : {wids : list i | wids <> nil})
       (* Base case *)
         simpl in *; absurd (S (length sds) <= 0); auto with arith.
       (* Cons case *)
-        simpl in *.
-        unfold invariant.
-        simpl.
+        unfold invariant in *.
+        simpl in *; auto.
    Admitted.
 
 Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -326,7 +325,9 @@ Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) 
     case (find (fun y  => proj1_sig (beqi eq_nat_dec n (getTag (getWorkspace y))))
          (getVisible s)).
     destruct s.
-  Admitted.
+    unfold invariant; simpl.
+    intros s H1 H2.
+Admitted.
 
 Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
   invariant s -> invariant (_greedyView eq_nat_dec n s).
@@ -337,8 +338,11 @@ Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l 
     case (find (fun x => proj1_sig 
                  (beqi eq_nat_dec n (getTag (getWorkspace x))))
                  (getVisible s)); auto.
-    destruct s; simpl.
-    destruct s; simpl.
+    destruct s; simpl; auto.
+    destruct s; simpl; auto.
+    destruct getVisible; simpl; auto.
+    unfold invariant; simpl; auto.
+    intros H.
   Admitted.
 
 Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -348,8 +352,7 @@ Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a s
     intros s IHs; simpl.
     cut (invariant (focusUp s)).
     intro H; apply (IHn _ H).
-    unfold invariant in *.
-    (* apply NoDupPerm.*)
+    unfold invariant in *; simpl in *.
   Admitted.
 
 Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -359,7 +362,8 @@ Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l
     intros st IHs; simpl.
     cut (invariant (focusMaster st)).
     intro H; apply (IHn _ H).
-    unfold invariant in *.
+    unfold invariant in *; simpl in *.
+    destruct (focusMaster st); simpl.
     Admitted.
 
       (*
