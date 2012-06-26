@@ -253,7 +253,7 @@ Lemma NoDupApp (xs ys : list a) (H : NoDup (xs ++ ys)) : NoDup (ys ++ xs).
      | apply IHys; apply NoDup_remove_1 in H; assumption].
   Qed.
 
-Lemma NoDupPerm (xs ys : list a) (H : NoDup xs) (p : Permutation xs ys)  : NoDup ys.
+Lemma NoDupPerm (xs ys : list a) (H : NoDup xs) (p : Permutation xs ys): NoDup ys.
   Proof.
     induction p.
     (* nil *)
@@ -272,7 +272,6 @@ Lemma NoDupPerm (xs ys : list a) (H : NoDup xs) (p : Permutation xs ys)  : NoDup
     (* trans *)
     apply IHp2,IHp1; auto.
     Qed.
- 
 
 Lemma PermApp (xs ys zs : list a):
   Permutation ys zs -> Permutation (xs ++ ys) (xs ++ zs).
@@ -300,8 +299,6 @@ Theorem prop_swap_master_I (s : StackSet.stackSet i l a sd) :
     apply (Permutation_trans (l' := (rev ls ++ l :: nil)));
       [ apply Permutation_rev | apply PermutationRotate].
   Qed.
-
-
 
 Theorem prop_empty_I (m : l) (wids : {wids : list i | wids <> nil}) 
   (sds : {sds : list sd | length sds <= length (proj1_sig wids) /\ sds <> nil}) 
