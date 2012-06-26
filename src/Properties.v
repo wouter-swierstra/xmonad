@@ -280,6 +280,14 @@ Proof.
   induction xs; [auto | simpl; auto].
 Qed.
 
+Lemma NoDupConsSwap (xs : list a) (x y : a):
+  NoDup (x :: y :: xs) -> NoDup (y :: x :: xs).
+Proof.
+  intros H.
+  apply (NoDupPerm (x :: y :: xs) (y :: x :: xs)).
+  apply H.
+  constructor.
+Qed.
 Lemma PermutationRotate (xs : list a) : Permutation xs (rotate xs).
   induction xs; [constructor | ].
   apply Permutation_cons_app; rewrite app_nil_r; auto.
