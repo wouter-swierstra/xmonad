@@ -313,6 +313,29 @@ Proof.
   apply H.
 Qed.
 
+Lemma NoDupAppR (xs ys : list a):
+  NoDup (xs ++ ys) -> NoDup ys.
+Proof.
+  intros H1.
+  destruct ys as [| y ys].
+  apply H1.
+  simpl in H1.
+Qed.
+Lemma NoDupAppL (xs ys : list a):
+Proof.
+  induction ys as [| y ys IHys].
+  rewrite -> app_nil_r in H1; apply H1.
+  apply H1.
+
+  NoDup (xs ++ ys) -> NoDup xs /\ NoDup ys.
+  split. induction xs as [|x xs IHxs]. constructor.
+  simpl in *. apply IHys.
+  apply NoDupAppConsR' in H1. apply H1.
+  intros H2.
+  apply (NoDupCons (xs ++ y :: ys) x); apply H1.
+  induction ys. constructor.
+  apply NoDupAppR in H1; auto.
+Qed.
 Lemma PermutationRotate (xs : list a) : Permutation xs (rotate xs).
   induction xs; [constructor | ].
   apply Permutation_cons_app; rewrite app_nil_r; auto.
