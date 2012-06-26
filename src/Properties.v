@@ -317,21 +317,38 @@ Lemma NoDupAppR (xs ys : list a):
   NoDup (xs ++ ys) -> NoDup ys.
 Proof.
   intros H1.
+  induction xs as [| x xs IHxs].
   destruct ys as [| y ys].
   apply H1.
-  simpl in H1.
-Qed.
-Lemma NoDupAppL (xs ys : list a):
-Proof.
-  induction ys as [| y ys IHys].
-  rewrite -> app_nil_r in H1; apply H1.
   apply H1.
+  simpl in H1.
+  apply IHxs.
+  apply NoDupCons in H1; apply H1.
+Qed.
 
+Lemma NoDupAppL (xs ys : list a):
+  NoDup (xs ++ ys) -> NoDup xs.
+Proof.
+  intros H1.
+  induction ys as [| y ys IHys].
+  destruct xs as [| x xs].
+  apply H1.
+  rewrite -> app_nil_r in H1; apply H1.
+  apply IHys.
+  apply (NoDupAppConsR xs ys y).
+  apply H1.
+Qed.
+
+Lemma NoDupAppSplit (xs ys : list a):
   NoDup (xs ++ ys) -> NoDup xs /\ NoDup ys.
+Proof.
+  intros H1.
   split. induction xs as [|x xs IHxs]. constructor.
+  induction ys as [| y ys IHys]. rewrite -> app_nil_r in H1. apply H1.
   simpl in *. apply IHys.
   apply NoDupAppConsR' in H1. apply H1.
   intros H2.
+  apply IHxs.
   apply (NoDupCons (xs ++ y :: ys) x); apply H1.
   induction ys. constructor.
   apply NoDupAppR in H1; auto.
