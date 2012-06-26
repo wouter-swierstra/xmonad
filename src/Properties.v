@@ -293,12 +293,12 @@ Lemma app_cons_ass (xs ys : list a) (x : a):
   x :: ys ++ xs = (x :: ys) ++ xs.
 Proof. reflexivity. Qed.
 
-Lemma NoDupAppConsR (xs ys : list a) (a b : a):
-  NoDup (xs ++ b :: ys) -> NoDup (xs ++ ys).
+Lemma NoDupAppConsR (xs ys : list a) (a : a):
+  NoDup (xs ++ a :: ys) -> NoDup (xs ++ ys).
 Proof.
   intros H1.
   apply NoDupAppAss.
-  apply (NoDupCons (ys ++ xs) b).
+  apply (NoDupCons (ys ++ xs) a).
   rewrite -> app_cons_ass.
   apply NoDupAppAss.
   apply H1.
@@ -309,7 +309,7 @@ Lemma NoDupAppConsR' (xs ys : list a) (a b : a):
 Proof.
   intros H.
   rewrite -> app_cons_ass.
-  apply (NoDupAppConsR (a :: xs) ys a b).
+  apply (NoDupAppConsR (a :: xs) ys b).
   apply H.
 Qed.
 
