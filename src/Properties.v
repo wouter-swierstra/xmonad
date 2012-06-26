@@ -274,6 +274,12 @@ Lemma NoDupPerm (xs ys : list a) (H : NoDup xs) (p : Permutation xs ys)  : NoDup
     Qed.
  
 
+Lemma PermApp (xs ys zs : list a):
+  Permutation ys zs -> Permutation (xs ++ ys) (xs ++ zs).
+Proof.
+  intros H1.
+  induction xs; [auto | simpl; auto].
+Qed.
 
 Lemma PermutationRotate (xs : list a) : Permutation xs (rotate xs).
   induction xs; [constructor | ].
