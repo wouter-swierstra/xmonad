@@ -342,17 +342,11 @@ Qed.
 Lemma NoDupAppSplit (xs ys : list a):
   NoDup (xs ++ ys) -> NoDup xs /\ NoDup ys.
 Proof.
-  intros H1.
-  split. induction xs as [|x xs IHxs]. constructor.
-  induction ys as [| y ys IHys]. rewrite -> app_nil_r in H1. apply H1.
-  simpl in *. apply IHys.
-  apply NoDupAppConsR' in H1. apply H1.
-  intros H2.
-  apply IHxs.
-  apply (NoDupCons (xs ++ y :: ys) x); apply H1.
-  induction ys. constructor.
-  apply NoDupAppR in H1; auto.
+  intros H1. split. 
+  apply (NoDupAppL xs ys); apply H1.
+  apply (NoDupAppR xs ys); apply H1.
 Qed.
+
 Lemma PermutationRotate (xs : list a) : Permutation xs (rotate xs).
   induction xs; [constructor | ].
   apply Permutation_cons_app; rewrite app_nil_r; auto.
