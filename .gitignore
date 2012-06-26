@@ -2,3 +2,4 @@ build/*
 *.glob
 *.vo
 *.#*
+.DS_Store
