@@ -288,6 +288,31 @@ Proof.
   apply H.
   constructor.
 Qed.
+
+Lemma app_cons_ass (xs ys : list a) (x : a):
+  x :: ys ++ xs = (x :: ys) ++ xs.
+Proof. reflexivity. Qed.
+
+Lemma NoDupAppConsR (xs ys : list a) (a b : a):
+  NoDup (xs ++ b :: ys) -> NoDup (xs ++ ys).
+Proof.
+  intros H1.
+  apply NoDupAppAss.
+  apply (NoDupCons (ys ++ xs) b).
+  rewrite -> app_cons_ass.
+  apply NoDupAppAss.
+  apply H1.
+Qed.
+
+Lemma NoDupAppConsR' (xs ys : list a) (a b : a):
+  NoDup (a :: xs ++ b :: ys) -> NoDup (a :: xs ++ ys).
+Proof.
+  intros H.
+  rewrite -> app_cons_ass.
+  apply (NoDupAppConsR (a :: xs) ys a b).
+  apply H.
+Qed.
+
 Lemma PermutationRotate (xs : list a) : Permutation xs (rotate xs).
   induction xs; [constructor | ].
   apply Permutation_cons_app; rewrite app_nil_r; auto.
