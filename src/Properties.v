@@ -166,7 +166,7 @@ Fixpoint concat (a : Set) (xss : list (list a)) : list a :=
   end.
 
 Definition invariant (i l a sd : Set) (s : StackSet.stackSet i l a sd) : Prop :=
-  let visibles := map getWorkspace (getVisible s) in
+  let visibles := map (fun x => getWorkspace x) (getVisible s) in
   let hiddens := getHidden s in
   let current := getWorkspace (getCurrent s) in
   let findStack := fun x => maybe nil (fun s => s :: nil) (getStack x) in
