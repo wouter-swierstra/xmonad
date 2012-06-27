@@ -358,6 +358,16 @@ Proof.
   intros ys. simpl. rewrite -> IHxs.
   rewrite -> app_ass. reflexivity.
 Qed.
+
+Lemma NoDupApp (xs ys : list a):
+  NoDup xs -> NoDup ys -> NoDup (xs ++ ys).
+Proof.
+  generalize dependent ys.
+  induction xs.
+  intros ys H1 H2. apply H2.
+  intros ys H1 H2.
+Admitted.
+
 Lemma NoDupAppApp (xs ys zs : list a) :
   NoDup (xs ++ ys ++ zs) -> NoDup (ys ++ zs).
 Proof.
@@ -368,6 +378,24 @@ Proof.
   intros zs ys H. apply IHxs.
   apply (NoDupCons (xs ++ ys ++ zs) x). assumption.
 Qed.
+
+Lemma NoDupFlatMapCons (x : a) (xs : list a) (f : a -> list b):
+  NoDup (flat_map f (x :: xs)) -> NoDup (flat_map f xs).
+Proof.
+  intros H.
+  induction xs as [| y ys IHys]. constructor.
+  simpl in *.
+  (* apply (NoDupAppApp (f x) (f y) ys). *)
+Admitted.
+
+Lemma NoDupFlatMap (xs ys : list a) (f : a -> list b):
+  NoDup (flat_map f xs) -> Permutation xs ys -> NoDup (flat_map f ys).
+Proof.
+  intros H1 H2.
+  induction ys as [| y ys IHys].
+  constructor.
+  simpl.
+Admitted.
 
 Lemma NoDupFlatMapApp (xs ys : list a) (f : a -> list b):
   NoDup (flat_map f (xs ++ ys)) -> NoDup (flat_map f xs ++ flat_map f ys).
