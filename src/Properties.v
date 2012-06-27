@@ -244,7 +244,7 @@ Lemma NotInComm (x : a) (xs ys : list a) : ~In x (xs ++ ys) -> ~In x (ys ++ xs).
 Lemma NotInApp (x : a) (xs ys : list a) : ~In x xs -> ~In x ys -> ~In x (xs ++ ys).
   destruct xs as [ | z zs]; auto.
   intros H1 H2 F; simpl.
-  apply H1.  
+  apply H1.
   Admitted.
 
 Lemma NoDupAppAss (xs ys : list a) (H : NoDup (xs ++ ys)) : NoDup (ys ++ xs).
@@ -468,7 +468,7 @@ Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l
     cut (invariant (focusMaster st)).
     intro H; apply (IHn _ H).
     unfold invariant in *; simpl in *.
-    destruct (focusMaster st); simpl.
+    
     Admitted.
 
       (*
