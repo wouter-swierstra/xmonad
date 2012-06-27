@@ -170,8 +170,9 @@ Definition invariant (i l a sd : Set) (s : StackSet.stackSet i l a sd) : Prop :=
   let hiddens := getHidden s in
   let current := getWorkspace (getCurrent s) in
   let findStack := fun x => maybe nil (fun s => s :: nil) (getStack x) in
+  let getFocusUpDown := fun t => getFocus t :: getUp t ++ getDown t in
   let ts := flat_map findStack (current :: visibles ++ hiddens) in
-  NoDup (flat_map (fun t => getFocus t :: getUp t ++ getDown t) ts).
+  NoDup (flat_map getFocusUpDown ts).
 
 Implicit Arguments invariant.
 
