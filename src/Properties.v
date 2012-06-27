@@ -348,6 +348,30 @@ Proof.
   apply (NoDupAppR xs ys); apply H1.
 Qed.
 
+Lemma FlatMapApp (xs ys : list a) (f : a -> list b):
+  flat_map f (xs ++ ys) = flat_map f xs ++ flat_map f ys.
+Proof.
+  generalize dependent ys.
+  induction xs as [| x xs IHxs]. reflexivity.
+  intros ys. simpl. rewrite -> IHxs.
+  rewrite -> app_ass. reflexivity.
+Qed.
+Lemma NoDupFlatMapApp (xs ys : list a) (f : a -> list b):
+  NoDup (flat_map f (xs ++ ys)) -> NoDup (flat_map f xs ++ flat_map f ys).
+Proof.
+  intros H.
+  rewrite <- FlatMapApp.
+  apply H.
+Qed.
+
+Lemma NoDupAppFlatMap (xs ys : list a) (f : a -> list b):
+  NoDup (flat_map f xs ++ flat_map f ys) -> NoDup (flat_map f (xs ++ ys)).
+Proof.
+  intros H.
+  rewrite -> FlatMapApp.
+  apply H.
+Qed.
+
 Lemma PermutationRotate (xs : list a) : Permutation xs (rotate xs).
   induction xs; [constructor | ].
   apply Permutation_cons_app; rewrite app_nil_r; auto.
