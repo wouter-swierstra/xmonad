@@ -247,13 +247,15 @@ Lemma NotInApp (x : a) (xs ys : list a) : ~In x xs -> ~In x ys -> ~In x (xs ++ y
   Admitted.
 
 Lemma NoDupAppAss (xs ys : list a) (H : NoDup (xs ++ ys)) : NoDup (ys ++ xs).
-  Proof.
-   induction ys.
-   rewrite app_nil_r in H; assumption.
-   constructor; 
-     [ apply NotInComm, NoDup_remove_2; assumption 
-     | apply IHys; apply NoDup_remove_1 in H; assumption].
-  Qed.
+Proof.
+  generalize dependent xs.
+  induction ys.
+  intros xs H.
+  rewrite app_nil_r in H; assumption.
+  constructor; 
+    [ apply NotInComm, NoDup_remove_2; assumption 
+    | apply IHys; apply NoDup_remove_1 in H; assumption].
+Qed.
 
 Lemma NoDupPerm (xs ys : list a) (H : NoDup xs) (p : Permutation xs ys): NoDup ys.
   Proof.
