@@ -323,10 +323,13 @@ Lemma NoDupAppR (xs ys : list a):
   NoDup (xs ++ ys) -> NoDup ys.
 Proof.
   intros H1.
+  generalize dependent ys.
   induction xs as [| x xs IHxs].
+  intros ys H1.
   destruct ys as [| y ys].
   apply H1.
   apply H1.
+  intros ys H1.
   simpl in H1.
   apply IHxs.
   apply NoDupCons in H1; apply H1.
