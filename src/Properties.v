@@ -195,14 +195,14 @@ Proof.
 Qed.
 
 Lemma InApp' (x y : a) (xs ys : list a) : In x (xs ++ ys) -> In x (xs ++ y :: ys).
-  Proof.
-    intro H.
-    induction xs.
-    right; assumption.
-    destruct H as [H | H].
-    rewrite H; constructor; reflexivity.
-    right; apply IHxs; assumption.
-  Qed.
+Proof.
+  generalize dependent ys.
+  induction xs.
+  right; assumption.
+  intros ys H. destruct H as [H | H].
+  rewrite H; constructor; reflexivity.
+  right; apply IHxs; assumption.
+Qed.
 
 Lemma InSuper (x : a) (xs ys : list a) : In x xs -> In x (xs ++ ys).
   intro H.
