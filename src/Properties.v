@@ -206,6 +206,7 @@ Lemma InApp' (x y : a) (xs ys : list a) : In x (xs ++ ys) -> In x (xs ++ y :: ys
 
 Lemma InSuper (x : a) (xs ys : list a) : In x xs -> In x (xs ++ ys).
   intro H.
+  generalize dependent ys.
   induction xs as [ | z zs].
   inversion H.
   inversion H.
@@ -214,7 +215,7 @@ Lemma InSuper (x : a) (xs ys : list a) : In x xs -> In x (xs ++ ys).
   constructor; exact Eq.
   right.
   apply (IHzs); auto.
-  Qed.
+Qed.
 
 Lemma InComm (x : a) (xs ys : list a) : In x (xs ++ ys) -> In x (ys ++ xs).
   Proof.
