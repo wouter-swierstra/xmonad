@@ -218,16 +218,17 @@ Lemma InSuper (x : a) (xs ys : list a) : In x xs -> In x (xs ++ ys).
 Qed.
 
 Lemma InComm (x : a) (xs ys : list a) : In x (xs ++ ys) -> In x (ys ++ xs).
-  Proof.
-    induction xs as [ | z zs].
-    simpl;rewrite app_nil_r; intros; assumption.
-    intro H; destruct H as [H | H].
-      rewrite H.
-      apply InApp.
-      apply InApp'.
-      apply IHzs.
-      assumption.
-  Qed.
+Proof.
+  generalize dependent ys.
+  induction xs as [ | z zs].
+  intros ys H. simpl;rewrite app_nil_r; intros; assumption.
+  intros ys H. destruct H as [H | H].
+  rewrite H.
+  apply InApp.
+  apply InApp'.
+  apply IHzs.
+  assumption.
+Qed.
 
 Lemma NotInComm (x : a) (xs ys : list a) : ~In x (xs ++ ys) -> ~In x (ys ++ xs).
   Proof.
