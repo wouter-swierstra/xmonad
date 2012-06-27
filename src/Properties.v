@@ -281,6 +281,8 @@ Lemma PermApp (xs ys zs : list a):
   Permutation ys zs -> Permutation (xs ++ ys) (xs ++ zs).
 Proof.
   intros H1.
+  generalize dependent ys.
+  generalize dependent zs.
   induction xs; [auto | simpl; auto].
 Qed.
 
