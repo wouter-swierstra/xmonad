@@ -188,9 +188,10 @@ Lemma NoDupCons (xs : list a) (x : a) : NoDup (x :: xs) -> NoDup xs.
 
 Lemma InApp (x : a) (xs ys : list a) : In x (xs ++ x :: ys).
   Proof.
+    generalize dependent ys.
     induction xs.
     simpl; constructor; reflexivity.
-    right; assumption.
+    intros ys. right. apply IHxs.
   Qed.
 
 Lemma InApp' (x y : a) (xs ys : list a) : In x (xs ++ ys) -> In x (xs ++ y :: ys).
