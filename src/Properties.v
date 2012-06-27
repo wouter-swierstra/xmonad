@@ -350,14 +350,6 @@ Proof.
   apply H.
 Qed.
 
-Lemma NoDupAppSplit (xs ys : list a):
-  NoDup (xs ++ ys) -> NoDup xs /\ NoDup ys.
-Proof.
-  intros H1. split. 
-  apply (NoDupAppL xs ys); apply H1.
-  apply (NoDupAppR xs ys); apply H1.
-Qed.
-
 Lemma FlatMapApp (xs ys : list a) (f : a -> list b):
   flat_map f (xs ++ ys) = flat_map f xs ++ flat_map f ys.
 Proof.
