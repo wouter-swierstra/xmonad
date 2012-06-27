@@ -339,14 +339,15 @@ Qed.
 Lemma NoDupAppL (xs ys : list a):
   NoDup (xs ++ ys) -> NoDup xs.
 Proof.
-  intros H1.
+  generalize dependent xs.
   induction ys as [| y ys IHys].
   destruct xs as [| x xs].
-  apply H1.
-  rewrite -> app_nil_r in H1; apply H1.
+  intros H; apply H.
+  intros H;  rewrite -> app_nil_r in H; apply H.
+  intros xs H.
   apply IHys.
   apply (NoDupAppConsR xs ys y).
-  apply H1.
+  apply H.
 Qed.
 
 Lemma NoDupAppSplit (xs ys : list a):
