@@ -166,11 +166,11 @@ Fixpoint concat (a : Set) (xss : list (list a)) : list a :=
   end.
 
 Definition invariant (i l a sd : Set) (s : StackSet.stackSet i l a sd) : Prop :=
-  let visibles := map (fun x => getWorkspace x) (getVisible s) in
+  let visibles := map getWorkspace (getVisible s) in
   let hiddens := getHidden s in
   let current := getWorkspace (getCurrent s) in
   let findStack := fun x => maybe nil (fun s => s :: nil) (getStack x) in
-  let ts := flat_map (fun x => findStack x) (current :: visibles ++ hiddens) in
+  let ts := flat_map findStack (current :: visibles ++ hiddens) in
   NoDup (flat_map (fun t => getFocus t :: getUp t ++ getDown t) ts).
 
 Implicit Arguments invariant.
