@@ -187,15 +187,6 @@ Proof.
   rewrite -> app_ass. reflexivity.
 Qed.
 
-Lemma NoDupApp : forall (a : Type) (xs ys : list a),
-  NoDup xs -> NoDup ys -> NoDup (xs ++ ys).
-Proof.
-  intros a xs.
-  induction xs.
-  intros ys H1 H2. apply H2.
-  intros ys H1 H2.
-Admitted.
-
 Lemma NoDupAppApp : forall (a : Type) (xs ys zs : list a),
   NoDup (xs ++ ys ++ zs) -> NoDup (ys ++ zs).
 Proof.
