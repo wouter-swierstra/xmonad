@@ -216,14 +216,30 @@ Proof.
   assumption.
 Qed.
 
+Lemma PermutationFlatMap : forall (a b : Type) (f : a -> list b) (xs ys : list a),
+  Permutation xs ys -> Permutation (flat_map f xs) (flat_map f ys).
+Proof.
+  intros a b f xs ys H.
+  induction H.
+  constructor.
+  simpl. apply Permutation_app_head. apply IHPermutation.
+  simpl. rewrite -> app_assoc. rewrite -> app_assoc.
+  apply Permutation_app_tail. apply Permutation_app_comm.
+  generalize IHPermutation2.
+  generalize IHPermutation1.
+  apply Permutation_trans.
+Qed.
+
 Lemma NoDupFlatMap : forall (a b : Type) (xs ys : list a) (f : a -> list b),
   NoDup (flat_map f xs) -> Permutation xs ys -> NoDup (flat_map f ys).
 Proof.
   intros a b xs ys f H1 H2.
-  induction ys as [| y ys IHys].
+  destruct ys as [| y ys ].
   constructor.
-  simpl.
-Admitted.
+  apply (NoDupPerm _ _ _ H1).
+  apply PermutationFlatMap.
+  apply H2.
+Qed.
 
 Lemma NoDupFlatMapApp : forall (a b : Type) (xs ys : list a) (f : a -> list b),
   NoDup (flat_map f (xs ++ ys)) -> NoDup (flat_map f xs ++ flat_map f ys).
