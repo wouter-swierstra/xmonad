@@ -140,7 +140,7 @@ Theorem prop_focus_master_local (x : StackSet.stackSet i l a sd) :
     destruct getCurrent; destruct getWorkspace.
     unfold hidden_spaces; reflexivity.
   Qed.
-
+  
 Theorem prop_focusMaster_idem (x : StackSet.stackSet i l a sd) :
   StackSet.focusMaster (StackSet.focusMaster x) = StackSet.focusMaster x.
   Proof.
@@ -224,6 +224,7 @@ Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) 
     destruct s.
     unfold invariant; simpl.
     intros s H1 H2.
+    apply (NoDupFlatMap _ _ _ _ _ H2); auto.
 Admitted.
 
 Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -240,6 +241,7 @@ Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l 
     destruct getVisible; simpl; auto.
     unfold invariant; simpl; auto.
     intros H.
+    apply (NoDupFlatMap _ _ _ _ _ H).
   Admitted.
 
 Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -250,6 +252,7 @@ Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a s
     cut (invariant (focusUp s)).
     intro H; apply (IHn _ H).
     unfold invariant in *; simpl in *.
+    apply (NoDupFlatMap _ _ _ _ _ IHs).
   Admitted.
 
 Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -260,7 +263,7 @@ Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l
     cut (invariant (focusMaster st)).
     intro H; apply (IHn _ H).
     unfold invariant in *; simpl in *.
-    
+    apply (NoDupFlatMap _ _ _ _ _ IHs).
     Admitted.
 
       (*
