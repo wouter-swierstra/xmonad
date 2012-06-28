@@ -248,11 +248,10 @@ Proof.
   apply H.
 Qed.
 
+Lemma NotInCons : forall (a : Type) (x y : a) (ys : list a),
+  ~ In x (y :: ys) -> ~ In x ys.
+Proof. Admitted.
+
 Lemma NotInApp : forall (a : Type) (x : a) (xs ys : list a),
   ~In x xs -> ~In x ys -> ~In x (xs ++ ys).
-Proof.
-  intros a x xs ys.
-  destruct xs as [ | z zs]; auto.
-  intros H1 H2 F; simpl.
-  apply H1.
-Admitted.
+Proof. Admitted.
