@@ -127,17 +127,13 @@ Proof.
   apply H. constructor.
 Qed.
 
-Lemma app_cons_ass : forall (a : Type) (xs ys : list a) (x : a),
-  x :: ys ++ xs = (x :: ys) ++ xs.
-Proof. reflexivity. Qed.
-
 Lemma NoDupAppConsR : forall (a : Type) (xs ys : list a) (x : a),
   NoDup (xs ++ x :: ys) -> NoDup (xs ++ ys).
 Proof.
   intros a xs ys x H1.
   apply NoDupAppAss.
   apply (NoDupCons _ (ys ++ xs) x).
-  rewrite -> app_cons_ass.
+  rewrite -> app_comm_cons.
   apply NoDupAppAss.
   apply H1.
 Qed.
@@ -146,7 +142,7 @@ Lemma NoDupAppConsR' : forall (a : Type) (xs ys : list a) (x y : a),
   NoDup (x :: xs ++ y :: ys) -> NoDup (x :: xs ++ ys).
 Proof.
   intros a xs ys x y H.
-  rewrite -> app_cons_ass.
+  rewrite -> app_comm_cons.
   apply (NoDupAppConsR _ (x :: xs) ys y).
   apply H.
 Qed.
