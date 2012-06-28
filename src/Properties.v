@@ -386,7 +386,7 @@ Proof.
   intros H.
   induction xs as [| y ys IHys]. constructor.
   simpl in *.
-  apply (NoDupAppApp (f y) (f x) (flat_map f ys)).
+  apply (NoDupAppApp (f x) (f y) (flat_map f ys)).
 Admitted.
 
 Lemma NoDupFlatMap (xs ys : list a) (f : a -> list b):
