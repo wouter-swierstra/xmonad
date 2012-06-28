@@ -212,9 +212,8 @@ Lemma NoDupFlatMapCons : forall (a b : Type) (x : a) (xs : list a) (f : a -> lis
 Proof.
   intros a b x xs f H.
   destruct xs as [| y ys ]. constructor.
-  simpl in *.
   apply (NoDupAppApp _ (f x) (f y) (flat_map f ys)).
-  apply H.
+  assumption.
 Qed.
 
 Lemma NoDupFlatMap : forall (a b : Type) (xs ys : list a) (f : a -> list b),
