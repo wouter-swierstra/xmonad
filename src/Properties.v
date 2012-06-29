@@ -6,7 +6,8 @@ Require Import ListLemmas.
 
 Variable (i l a b sd : Set).
 
-Lemma focusUpDown' (s : stack a) : focusDown' (focusUp' s) = s.
+Lemma focusUpDown' (s : stack a) :
+  focusDown' (focusUp' s) = s.
   Proof.
     destruct s as [[ | l ls] c rs]; try reflexivity.
     unfold StackSet.focusUp'; simpl.
@@ -20,7 +21,8 @@ Lemma focusUpDown' (s : stack a) : focusDown' (focusUp' s) = s.
       intro Eq; rewrite rev_unit, <- Eq; reflexivity.
   Qed.
 
-Lemma focusDownUp' (s : StackSet.stack a) : StackSet.focusUp' (StackSet.focusDown' s) = s.
+Lemma focusDownUp' (s : StackSet.stack a) :
+  StackSet.focusUp' (StackSet.focusDown' s) = s.
   Proof.
     destruct s as [ls c [ | r rs]]; unfold StackSet.focusDown'; try reflexivity.
     simpl; f_equal.
@@ -53,19 +55,22 @@ Lemma modifyComp (f g : StackSet.stack a -> StackSet.stack a) (s : StackSet.stac
     destruct getCurrent; destruct getWorkspace; destruct getStack; repeat (f_equal).
   Qed.
 
-Theorem prop_focus_right (s : StackSet.stackSet i l a sd) : StackSet.focusDown (StackSet.focusUp s) = s.
+Theorem prop_focus_right (s : StackSet.stackSet i l a sd) :
+  StackSet.focusDown (StackSet.focusUp s) = s.
   Proof.
     unfold StackSet.focusUp, StackSet.focusDown.
     rewrite modifyComp, modifyId; [ | intros; rewrite focusUpDown']; reflexivity.
   Qed.
 
-Theorem prop_focus_left (s : StackSet.stackSet i l a sd) : StackSet.focusUp (StackSet.focusDown s) = s.
+Theorem prop_focus_left (s : StackSet.stackSet i l a sd) :
+  StackSet.focusUp (StackSet.focusDown s) = s.
   Proof.
     unfold StackSet.focusUp, StackSet.focusDown.
     rewrite modifyComp, modifyId; auto; intros; rewrite focusDownUp'; reflexivity.
   Qed.
 
-Theorem prop_swap_master_focus (x : StackSet.stackSet i l a sd) : StackSet.peek (StackSet.swapMaster x) = StackSet.peek x.
+Theorem prop_swap_master_focus (x : StackSet.stackSet i l a sd) :
+  StackSet.peek (StackSet.swapMaster x) = StackSet.peek x.
   Proof.
     destruct x; unfold StackSet.peek; unfold StackSet.swapMaster; unfold StackSet.modify'.
     destruct getCurrent; destruct getWorkspace.
@@ -73,7 +78,8 @@ Theorem prop_swap_master_focus (x : StackSet.stackSet i l a sd) : StackSet.peek 
     destruct getStack; simpl; [ destruct s; destruct getUp | ] ; reflexivity.
   Qed.
 
-Theorem prop_swap_left_focus (x : StackSet.stackSet i l a sd) : StackSet.peek (StackSet.swapUp x) = StackSet.peek x.
+Theorem prop_swap_left_focus (x : StackSet.stackSet i l a sd) :
+  StackSet.peek (StackSet.swapUp x) = StackSet.peek x.
   Proof.
     destruct x; unfold StackSet.peek; unfold StackSet.swapUp; unfold StackSet.modify'.
     destruct getCurrent; destruct getWorkspace.
@@ -81,7 +87,8 @@ Theorem prop_swap_left_focus (x : StackSet.stackSet i l a sd) : StackSet.peek (S
     destruct getStack; simpl; [destruct s; destruct getUp | ]; reflexivity.
   Qed.
 
-Theorem prop_swap_right_focus (x : StackSet.stackSet i l a sd) : StackSet.peek (StackSet.swapDown x) = StackSet.peek x.
+Theorem prop_swap_right_focus (x : StackSet.stackSet i l a sd) :
+  StackSet.peek (StackSet.swapDown x) = StackSet.peek x.
   Proof.
     destruct x; unfold StackSet.peek; unfold StackSet.swapDown; unfold StackSet.modify'.
     destruct getCurrent; destruct getWorkspace.
@@ -224,7 +231,7 @@ Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) 
     destruct s.
     unfold invariant; simpl.
     intros s H1 H2.
-    apply (NoDupFlatMap _ _ _ _ _ H2); auto.
+    apply (NoDupFlatMap _ _ _ _ _ H2).
 Admitted.
 
 Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
