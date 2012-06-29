@@ -282,15 +282,6 @@ Proof.
   apply (NotInCons _ x x' xs). unfold not. apply H1.
 Admitted.
 
-Lemma PermutationMaybeNilFlatMap : forall (a b c : Type) (ox oy : option c) (g h : a -> list c) (f : c -> list c) (xs ys : list a),
-  Permutation (flat_map g xs) (flat_map h ys) ->
-  Permutation (maybe nil f ox ++ flat_map g xs) (maybe nil f ox ++ flat_map h ys).
-Proof. 
-  intros a b c ox oy g h f xs ys H.
-  destruct ox as [cx |].
-  simpl. apply Permutation_app_head. assumption.
-  simpl. assumption.
-Qed.
 Lemma NoDupFlatMapL : forall (a b : Type) (f : a -> list b) (xs : list a),
   NoDup (flat_map f xs) -> NoDup xs.
 Proof.
