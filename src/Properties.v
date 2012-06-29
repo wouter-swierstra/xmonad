@@ -242,11 +242,10 @@ Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l 
     case (find (fun x => proj1_sig 
                  (beqi eq_nat_dec n (getTag (getWorkspace x))))
                  (getVisible s)); auto.
-    destruct s; simpl; auto.
-    destruct s; simpl; auto.
-    destruct getVisible; simpl; auto.
-    unfold invariant; simpl; auto.
-    intros H.
+    destruct s. destruct s.
+    destruct getVisible.
+    unfold invariant.
+    simpl; intros H.
     apply (NoDupFlatMap _ _ _ _ _ H).
     apply Permutation_app_head.
   Admitted.
