@@ -291,6 +291,21 @@ Proof.
   simpl. apply Permutation_app_head. assumption.
   simpl. assumption.
 Qed.
+Lemma NoDupFlatMapL : forall (a b : Type) (f : a -> list b) (xs : list a),
+  NoDup (flat_map f xs) -> NoDup xs.
+Proof.
+  intros a b f xs H.
+  induction xs as [| x xs IHxs ].
+  constructor.
+  constructor.
+Admitted.
+
+Lemma NoDupFlatMapR : forall (a b : Type) (f : a -> list b) (xs : list a),
+  NoDup xs -> NoDup (flat_map f xs).
+Proof.
+  intros a b f xs H.
+  induction H as [|l ls]. constructor.  
+Admitted.
 
 (*
 let f := (fun s : stack a => s :: nil) in
