@@ -248,6 +248,7 @@ Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l 
     unfold invariant; simpl; auto.
     intros H.
     apply (NoDupFlatMap _ _ _ _ _ H).
+    apply Permutation_app_head.
   Admitted.
 
 Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
