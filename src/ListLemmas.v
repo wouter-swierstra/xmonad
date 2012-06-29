@@ -216,7 +216,8 @@ Proof.
   simpl. apply Permutation_app_head. apply IHPermutation.
   simpl. do 2 rewrite -> app_assoc.
   apply Permutation_app_tail. apply Permutation_app_comm.
-  generalize IHPermutation1, IHPermutation2.
+  generalize IHPermutation2.
+  generalize IHPermutation1.
   apply Permutation_trans.
 Qed.
 
@@ -257,12 +258,4 @@ Qed.
 
 Lemma NotInApp : forall (a : Type) (x : a) (xs ys : list a),
   ~In x xs -> ~In x ys -> ~In x (xs ++ ys).
-Proof. Admitted.Lemma PermutationMaybeNilFlatMap : forall (a b c : Type) (ox oy : option c) (g h : a -> list c) (f : c -> list c) (xs ys : list a),
-  Permutation (flat_map g xs) (flat_map h ys) ->
-  Permutation (maybe nil f ox ++ flat_map g xs) (maybe nil f ox ++ flat_map h ys).
-Proof. 
-  intros a b c ox oy g h f xs ys H.
-  destruct ox as [cx |].
-  simpl. apply Permutation_app_head. assumption.
-  simpl. assumption.
-Qed.
+Proof. Admitted.
