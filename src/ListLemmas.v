@@ -291,13 +291,6 @@ Proof.
   constructor.
 Admitted.
 
-Lemma NoDupFlatMapR : forall (a b : Type) (f : a -> list b) (xs : list a),
-  NoDup xs -> NoDup (flat_map f xs).
-Proof.
-  intros a b f xs H.
-  induction H as [|l ls]. constructor.  
-Admitted.
-
 (*
 let f := (fun s : stack a => s :: nil) in
 Permutation (flat_map g xs) (flat_map h ys) ->
