@@ -256,6 +256,19 @@ Proof.
   apply H1. apply in_cons. apply H2.
 Qed.
 
+Lemma NoDupNotIn : forall (a : Type) (x : a) (xs : list a),
+  NoDup (x :: xs) -> ~ In x xs.
+Proof.
+  intros a x xs H1.
+  induction xs as [| x' xs IHxs].
+  apply in_nil.
+  unfold not in *.
+  intros H2.
+  apply IHxs.
+  apply (NoDupCons _ (x :: xs) x').
+  apply NoDupConsSwap; apply H1.
+Admitted.
+
 Lemma NotInApp : forall (a : Type) (x : a) (xs ys : list a),
   ~In x xs -> ~In x ys -> ~In x (xs ++ ys).
 Proof.
