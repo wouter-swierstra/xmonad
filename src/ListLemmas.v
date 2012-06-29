@@ -250,7 +250,11 @@ Qed.
 
 Lemma NotInCons : forall (a : Type) (x y : a) (ys : list a),
   ~ In x (y :: ys) -> ~ In x ys.
-Proof. Admitted.
+Proof.
+  unfold not. 
+  intros a x y ys H1 H2.
+  apply H1. apply in_cons. apply H2.
+Qed.
 
 Lemma NotInApp : forall (a : Type) (x : a) (xs ys : list a),
   ~In x xs -> ~In x ys -> ~In x (xs ++ ys).
