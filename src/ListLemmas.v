@@ -171,7 +171,7 @@ Proof.
   induction ys as [| y ys IHys].
   destruct xs as [| x xs].
   intros H; apply H.
-  intros H;  rewrite -> app_nil_r in H; apply H.
+  intros H; rewrite -> app_nil_r in H; apply H.
   intros xs H.
   apply IHys.
   apply (NoDupAppConsR _ xs ys y).
@@ -214,7 +214,7 @@ Proof.
   induction H.
   constructor.
   simpl. apply Permutation_app_head. apply IHPermutation.
-  simpl. rewrite -> app_assoc. rewrite -> app_assoc.
+  simpl. do 2 rewrite -> app_assoc.
   apply Permutation_app_tail. apply Permutation_app_comm.
   generalize IHPermutation2.
   generalize IHPermutation1.
