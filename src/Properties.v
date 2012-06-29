@@ -217,8 +217,7 @@ Theorem prop_empty_I (m : l) (wids : {wids : list i | wids <> nil})
       (* Base case *)
         simpl in *; absurd (S (length sds) <= 0); auto with arith.
       (* Cons case *)
-        unfold invariant in *.
-        simpl in *; auto.
+        unfold invariant in *; simpl in *.
    Admitted.
 
 Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :

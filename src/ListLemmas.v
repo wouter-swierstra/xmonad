@@ -258,4 +258,69 @@ Qed.
 
 Lemma NotInApp : forall (a : Type) (x : a) (xs ys : list a),
   ~In x xs -> ~In x ys -> ~In x (xs ++ ys).
-Proof. Admitted.
+Proof.
+  unfold not.
+  intros a x xs ys H1 H2 H3.
+  induction xs as [| x' xs IHxs ].
+  apply H2; apply H3.
+  induction ys as [| y ys IHys].
+  apply H1. rewrite -> app_nil_r in H3. apply H3.
+  apply IHxs.
+  apply (NotInCons _ x x' xs). unfold not. apply H1.
+Admitted.
+
+Lemma PermutationMaybeNilFlatMap : forall (a b c : Type) (ox oy : option c) (g h : a -> list c) (f : c -> list c) (xs ys : list a),
+  Permutation (flat_map g xs) (flat_map h ys) ->
+  Permutation (maybe nil f ox ++ flat_map g xs) (maybe nil f ox ++ flat_map h ys).
+Proof. 
+  intros a b c ox oy g h f xs ys H.
+  destruct ox as [cx |].
+  simpl. apply Permutation_app_head. assumption.
+  simpl. assumption.
+Qed.
+
+(*
+let f := (fun s : stack a => s :: nil) in
+Permutation (flat_map g xs) (flat_map h ys) ->
+Permutation (maybe nil f ox ++ flat_map g xs)) (maybe nil f oy ++ flat_map h ys))
+
+maybe : forall a b, b -> (a -> b) -> option a -> b
+
+TODO: Find some interesting lemmas in this:
+
+
+  Permutation
+     (maybe nil (fun s0 : stack a => s0 :: nil)
+        (getStack (getWorkspace getCurrent)) ++
+      flat_map
+        (fun x : workspace nat l a =>
+         maybe nil (fun s0 : stack a => s0 :: nil) (getStack x))
+        (map (fun x : screen nat l a sd => getWorkspace x) getVisible ++
+         getHidden))
+     (maybe nil (fun s0 : stack a => s0 :: nil) (getStack (getWorkspace s)) ++
+      flat_map
+        (fun x : workspace nat l a =>
+         maybe nil (fun s0 : stack a => s0 :: nil) (getStack x))
+        (map (fun x : screen nat l a sd => getWorkspace x)
+           (deleteBy
+              (fun x y : screen nat l a sd =>
+               proj1_sig (beqsid (getScreen x) (getScreen y))) s getVisible) ++
+         getHidden))
+
+
+   Permutation
+     (maybe nil (fun s0 : stack a => s0 :: nil)
+        (getStack (getWorkspace (getCurrent st))) ++
+      flat_map
+        (fun x : workspace nat l a =>
+         maybe nil (fun s0 : stack a => s0 :: nil) (getStack x))
+        (map (fun x : screen nat l a sd => getWorkspace x) (getVisible st) ++
+         getHidden st))
+     (maybe nil (fun s0 : stack a => s0 :: nil)
+        (getStack (getWorkspace (getCurrent (focusMaster st)))) ++
+      flat_map
+        (fun x : workspace nat l a =>
+         maybe nil (fun s0 : stack a => s0 :: nil) (getStack x))
+        (map (fun x : screen nat l a sd => getWorkspace x)
+           (getVisible (focusMaster st)) ++ getHidden (focusMaster st)))
+*)
