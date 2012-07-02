@@ -110,20 +110,6 @@ Proof.
   apply IHPermutation2,IHPermutation1; auto.
 Qed.
 
-Lemma PermAppAss : forall (a : Type) (ws xs ys zs: list a),
-  Permutation (ws ++ xs) (ys ++ zs) -> Permutation (xs ++ ws) (zs ++ ys).
-Proof.
-  intros a ws xs ys zs H.
-  induction ws as [| w ws IHws].
-  induction ys as [| y ys IHys].
-  simpl in *; repeat rewrite -> app_nil_r in *. apply H.
-  simpl in *; repeat rewrite -> app_nil_r in *.
-  induction zs as [| z zs IHzs]. simpl in *; repeat rewrite -> app_nil_r in *.
-  apply H.
-  induction xs as [| x xs IHxs]. simpl.
-  apply (Permutation_nil_cons (l := ys ++ z :: zs) (x := y)) in H. inversion H.
-Admitted.
-
 Lemma PermAppL : forall (a : Type) (xs ys zs : list a),
   Permutation ys zs -> Permutation (xs ++ ys) (xs ++ zs).
 Proof.
@@ -136,10 +122,11 @@ Qed.
 Lemma PermAppR : forall (a : Type) (xs ys zs : list a),
   Permutation ys zs -> Permutation (ys ++ xs) (zs ++ xs).
 Proof.
-  intros a xs ys zs H1.
-  apply PermAppAss.
-  apply PermAppL.
-  apply H1.
+  intros a xs ys zs H.
+  induction xs as [| x xs IHxs].
+  do 2 rewrite -> app_nil_r; apply H.
+  apply Permutation_add_inside. apply H.
+  apply Permutation_refl.  
 Qed.
 
 Lemma NoDupConsSwap : forall (a : Type) (xs : list a) (x y : a),
