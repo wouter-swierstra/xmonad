@@ -167,14 +167,8 @@ Lemma NoDupAppL : forall (a : Type) (xs ys : list a),
   NoDup (xs ++ ys) -> NoDup xs.
 Proof.
   intros a xs ys H.
-  generalize dependent xs.
-  induction ys as [| y ys IHys].
-  destruct xs as [| x xs].
-  intros H; apply H.
-  intros H; rewrite -> app_nil_r in H; apply H.
-  intros xs H.
-  apply IHys.
-  apply (NoDupAppConsR _ xs ys y).
+  apply NoDupAppAss in H.
+  apply (NoDupAppR _ ys xs).
   apply H.
 Qed.
 
