@@ -103,6 +103,7 @@ XMONADDIR:=$(BUILDDIR)/xmonad-0.10/
 
 EXTRACTION_FILE:=src/Extraction.v
 VFILES:=src/Aux.v\
+	src/ListLemmas.v\
   src/StackSet.v\
   src/Properties.v
 VOFILES:=$(VFILES:.v=.vo)
