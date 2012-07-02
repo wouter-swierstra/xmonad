@@ -2,10 +2,12 @@ Require Import Aux List.
 Require Import StackSet.
 Require Import Arith.
 Require Import Sorting.Permutation.
+Require Import ListLemmas.
 
-Variable (i l a sd : Set).
+Variable (i l a b sd : Set).
 
-Lemma focusUpDown' (s : stack a) : focusDown' (focusUp' s) = s.
+Lemma focusUpDown' (s : stack a) :
+  focusDown' (focusUp' s) = s.
   Proof.
     destruct s as [[ | l ls] c rs]; try reflexivity.
     unfold StackSet.focusUp'; simpl.
@@ -19,7 +21,8 @@ Lemma focusUpDown' (s : stack a) : focusDown' (focusUp' s) = s.
       intro Eq; rewrite rev_unit, <- Eq; reflexivity.
   Qed.
 
-Lemma focusDownUp' (s : StackSet.stack a) : StackSet.focusUp' (StackSet.focusDown' s) = s.
+Lemma focusDownUp' (s : StackSet.stack a) :
+  StackSet.focusUp' (StackSet.focusDown' s) = s.
   Proof.
     destruct s as [ls c [ | r rs]]; unfold StackSet.focusDown'; try reflexivity.
     simpl; f_equal.
@@ -52,19 +55,22 @@ Lemma modifyComp (f g : StackSet.stack a -> StackSet.stack a) (s : StackSet.stac
     destruct getCurrent; destruct getWorkspace; destruct getStack; repeat (f_equal).
   Qed.
 
-Theorem prop_focus_right (s : StackSet.stackSet i l a sd) : StackSet.focusDown (StackSet.focusUp s) = s.
+Theorem prop_focus_right (s : StackSet.stackSet i l a sd) :
+  StackSet.focusDown (StackSet.focusUp s) = s.
   Proof.
     unfold StackSet.focusUp, StackSet.focusDown.
     rewrite modifyComp, modifyId; [ | intros; rewrite focusUpDown']; reflexivity.
   Qed.
 
-Theorem prop_focus_left (s : StackSet.stackSet i l a sd) : StackSet.focusUp (StackSet.focusDown s) = s.
+Theorem prop_focus_left (s : StackSet.stackSet i l a sd) :
+  StackSet.focusUp (StackSet.focusDown s) = s.
   Proof.
     unfold StackSet.focusUp, StackSet.focusDown.
     rewrite modifyComp, modifyId; auto; intros; rewrite focusDownUp'; reflexivity.
   Qed.
 
-Theorem prop_swap_master_focus (x : StackSet.stackSet i l a sd) : StackSet.peek (StackSet.swapMaster x) = StackSet.peek x.
+Theorem prop_swap_master_focus (x : StackSet.stackSet i l a sd) :
+  StackSet.peek (StackSet.swapMaster x) = StackSet.peek x.
   Proof.
     destruct x; unfold StackSet.peek; unfold StackSet.swapMaster; unfold StackSet.modify'.
     destruct getCurrent; destruct getWorkspace.
@@ -72,7 +78,8 @@ Theorem prop_swap_master_focus (x : StackSet.stackSet i l a sd) : StackSet.peek 
     destruct getStack; simpl; [ destruct s; destruct getUp | ] ; reflexivity.
   Qed.
 
-Theorem prop_swap_left_focus (x : StackSet.stackSet i l a sd) : StackSet.peek (StackSet.swapUp x) = StackSet.peek x.
+Theorem prop_swap_left_focus (x : StackSet.stackSet i l a sd) :
+  StackSet.peek (StackSet.swapUp x) = StackSet.peek x.
   Proof.
     destruct x; unfold StackSet.peek; unfold StackSet.swapUp; unfold StackSet.modify'.
     destruct getCurrent; destruct getWorkspace.
@@ -80,7 +87,8 @@ Theorem prop_swap_left_focus (x : StackSet.stackSet i l a sd) : StackSet.peek (S
     destruct getStack; simpl; [destruct s; destruct getUp | ]; reflexivity.
   Qed.
 
-Theorem prop_swap_right_focus (x : StackSet.stackSet i l a sd) : StackSet.peek (StackSet.swapDown x) = StackSet.peek x.
+Theorem prop_swap_right_focus (x : StackSet.stackSet i l a sd) :
+  StackSet.peek (StackSet.swapDown x) = StackSet.peek x.
   Proof.
     destruct x; unfold StackSet.peek; unfold StackSet.swapDown; unfold StackSet.modify'.
     destruct getCurrent; destruct getWorkspace.
@@ -139,7 +147,7 @@ Theorem prop_focus_master_local (x : StackSet.stackSet i l a sd) :
     destruct getCurrent; destruct getWorkspace.
     unfold hidden_spaces; reflexivity.
   Qed.
-
+  
 Theorem prop_focusMaster_idem (x : StackSet.stackSet i l a sd) :
   StackSet.focusMaster (StackSet.focusMaster x) = StackSet.focusMaster x.
   Proof.
@@ -170,110 +178,11 @@ Definition invariant (i l a sd : Set) (s : StackSet.stackSet i l a sd) : Prop :=
   let hiddens := getHidden s in
   let current := getWorkspace (getCurrent s) in
   let findStack := fun x => maybe nil (fun s => s :: nil) (getStack x) in
-  let ts := flat_map (fun x => findStack x) (current :: visibles ++ hiddens) in
-  NoDup (flat_map (fun t => getFocus t :: getUp t ++ getDown t) ts).
+  let getFocusUpDown := fun t => getFocus t :: getUp t ++ getDown t in
+  let ts := flat_map findStack (current :: visibles ++ hiddens) in
+  NoDup (flat_map getFocusUpDown ts).
 
 Implicit Arguments invariant.
-
-Lemma NoDupSingle (x : a) : NoDup (x :: nil).
-  constructor; auto; constructor.
-  Qed.
-
-Lemma NoDupCons (xs : list a) (x : a) : NoDup (x :: xs) -> NoDup xs.
-  Proof.
-    intro H; induction xs.
-    constructor.
-    inversion H; assumption.
-  Qed.    
-
-Lemma InApp (x : a) (xs ys : list a) : In x (xs ++ x :: ys).
-  Proof.
-    induction xs.
-    simpl; constructor; reflexivity.
-    right; assumption.
-  Qed.
-
-Lemma InApp' (x y : a) (xs ys : list a) : In x (xs ++ ys) -> In x (xs ++ y :: ys).
-  Proof.
-    intro H.
-    induction xs.
-    right; assumption.
-    destruct H as [H | H].
-    rewrite H; constructor; reflexivity.
-    right; apply IHxs; assumption.
-  Qed.
-
-Lemma InSuper (x : a) (xs ys : list a) : In x xs -> In x (xs ++ ys).
-  intro H.
-  induction xs as [ | z zs].
-  inversion H.
-  inversion H.
-  constructor; exact H0.
-  destruct H as [Eq | Later].
-  constructor; exact Eq.
-  right.
-  apply (IHzs); auto.
-  Qed.
-
-Lemma InComm (x : a) (xs ys : list a) : In x (xs ++ ys) -> In x (ys ++ xs).
-  Proof.
-    induction xs as [ | z zs].
-    simpl;rewrite app_nil_r; intros; assumption.
-    intro H; destruct H as [H | H].
-      rewrite H.
-      apply InApp.
-      apply InApp'.
-      apply IHzs.
-      assumption.
-  Qed.
-
-Lemma NotInComm (x : a) (xs ys : list a) : ~In x (xs ++ ys) -> ~In x (ys ++ xs).
-  Proof.
-    intros F H.
-    induction ys as [ | y ys].
-    induction xs as [ | z zs]; auto.
-    rewrite app_nil_r in F; simpl in *; contradiction.
-    destruct H as [H | H].
-    rewrite H in *; apply F, InApp; assumption.
-    apply F, InApp', InComm; auto.
-  Qed.
-
-Lemma NotInApp (x : a) (xs ys : list a) : ~In x xs -> ~In x ys -> ~In x (xs ++ ys).
-  destruct xs as [ | z zs]; auto.
-  intros H1 H2 F; simpl.
-  apply H1.  
-  Admitted.
-
-Lemma NoDupApp (xs ys : list a) (H : NoDup (xs ++ ys)) : NoDup (ys ++ xs).
-  Proof.
-   induction ys.
-   rewrite app_nil_r in H; assumption.
-   constructor; 
-     [ apply NotInComm, NoDup_remove_2; assumption 
-     | apply IHys; apply NoDup_remove_1 in H; assumption].
-  Qed.
-
-Lemma NoDupPerm (xs ys : list a) (H : NoDup xs) (p : Permutation xs ys)  : NoDup ys.
-  Proof.
-    induction p.
-    (* nil *)
-    constructor.
-    (* skip *)
-    constructor. 
-    intro F; apply (NoDup_remove_2 nil l0 x); auto.
-    apply (Permutation_in (l:=l'));
-      [ apply (Permutation_sym) | ]; auto.
-    apply IHp.
-    inversion H; auto.
-    (* swap *)
-    constructor.
-    apply (NoDup_remove_2 (y :: nil) l0 x); auto.
-    apply (NoDup_remove_1 (y :: nil) l0 x); auto.
-    (* trans *)
-    apply IHp2,IHp1; auto.
-    Qed.
- 
-
 
 Lemma PermutationRotate (xs : list a) : Permutation xs (rotate xs).
   induction xs; [constructor | ].
@@ -288,14 +197,12 @@ Theorem prop_swap_master_I (s : StackSet.stackSet i l a sd) :
     destruct s as [ls c rs]; auto.
     destruct ls as [ | l ls]; auto.
     unfold withStack; unfold invariant in *.
-    apply (NoDupPerm _ _ H); clear H.
+    apply (NoDupPerm _ _ _ H); clear H.
     simpl; constructor.
     do 2 (rewrite app_comm_cons; apply Permutation_app_tail).
     apply (Permutation_trans (l' := (rev ls ++ l :: nil)));
       [ apply Permutation_rev | apply PermutationRotate].
   Qed.
-
-
 
 Theorem prop_empty_I (m : l) (wids : {wids : list i | wids <> nil}) 
   (sds : {sds : list sd | length sds <= length (proj1_sig wids) /\ sds <> nil}) 
@@ -310,9 +217,7 @@ Theorem prop_empty_I (m : l) (wids : {wids : list i | wids <> nil})
       (* Base case *)
         simpl in *; absurd (S (length sds) <= 0); auto with arith.
       (* Cons case *)
-        simpl in *.
-        unfold invariant.
-        simpl.
+        unfold invariant in *; simpl in *.
    Admitted.
 
 Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -323,7 +228,10 @@ Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) 
     case (find (fun y  => proj1_sig (beqi eq_nat_dec n (getTag (getWorkspace y))))
          (getVisible s)).
     destruct s.
-  Admitted.
+    unfold invariant; simpl.
+    intros s H1 H2.
+    apply (NoDupFlatMap _ _ _ _ _ H2).
+Admitted.
 
 Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
   invariant s -> invariant (_greedyView eq_nat_dec n s).
@@ -334,8 +242,12 @@ Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l 
     case (find (fun x => proj1_sig 
                  (beqi eq_nat_dec n (getTag (getWorkspace x))))
                  (getVisible s)); auto.
-    destruct s; simpl.
-    destruct s; simpl.
+    destruct s. destruct s.
+    destruct getVisible.
+    unfold invariant.
+    simpl; intros H.
+    apply (NoDupFlatMap _ _ _ _ _ H).
+    apply Permutation_app_head.
   Admitted.
 
 Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -345,8 +257,8 @@ Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a s
     intros s IHs; simpl.
     cut (invariant (focusUp s)).
     intro H; apply (IHn _ H).
-    unfold invariant in *.
-    (* apply NoDupPerm.*)
+    unfold invariant in *; simpl in *.
+    apply (NoDupFlatMap _ _ _ _ _ IHs).
   Admitted.
 
 Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -356,7 +268,8 @@ Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l
     intros st IHs; simpl.
     cut (invariant (focusMaster st)).
     intro H; apply (IHn _ H).
-    unfold invariant in *.
+    unfold invariant in *; simpl in *.
+    apply (NoDupFlatMap _ _ _ _ _ IHs).
     Admitted.
 
       (*
