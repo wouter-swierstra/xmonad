@@ -110,13 +110,34 @@ Proof.
   apply IHPermutation2,IHPermutation1; auto.
 Qed.
 
-Lemma PermApp : forall (a : Type) (xs ys zs : list a),
+Lemma PermAppAss : forall (a : Type) (xs ys zs: list a),
+  Permutation (xs ++ ys) (xs ++ zs) -> Permutation (ys ++ xs) (zs ++ xs).
+Proof.
+  intros a xs ys zs H.
+  induction xs as [| x xs IHxs].
+  do 2 rewrite -> app_nil_r; apply H.
+  apply Permutation_add_inside.
+  simpl in H. apply Permutation_cons_inv in H.
+  apply Permutation_app_inv_l in H; apply H.
+  apply Permutation_refl.
+Qed.
+
+Lemma PermAppL : forall (a : Type) (xs ys zs : list a),
   Permutation ys zs -> Permutation (xs ++ ys) (xs ++ zs).
 Proof.
   intros a xs ys zs H1.
   generalize dependent ys.
   generalize dependent zs.
   induction xs; [auto | simpl; auto].
+Qed.
+
+Lemma PermAppR : forall (a : Type) (xs ys zs : list a),
+  Permutation ys zs -> Permutation (ys ++ xs) (zs ++ xs).
+Proof.
+  intros a xs ys zs H1.
+  apply PermAppAss.
+  apply PermAppL.
+  apply H1.
 Qed.
 
 Lemma NoDupConsSwap : forall (a : Type) (xs : list a) (x y : a),
