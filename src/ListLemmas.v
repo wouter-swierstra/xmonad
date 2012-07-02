@@ -187,23 +187,12 @@ Proof.
   rewrite -> app_ass. reflexivity.
 Qed.
 
-Lemma NoDupAppApp : forall (a : Type) (xs ys zs : list a),
-  NoDup (xs ++ ys ++ zs) -> NoDup (ys ++ zs).
-Proof.
-  intros a xs ys zs H.
-  generalize dependent ys.
-  generalize dependent zs.
-  induction xs as [| x xs IHxs]. simpl; intros; assumption.
-  intros zs ys H. apply IHxs.
-  apply (NoDupCons _ (xs ++ ys ++ zs) x). assumption.
-Qed.
-
 Lemma NoDupFlatMapCons : forall (a b : Type) (x : a) (xs : list a) (f : a -> list b),
   NoDup (flat_map f (x :: xs)) -> NoDup (flat_map f xs).
 Proof.
   intros a b x xs f H.
   destruct xs as [| y ys ]. constructor.
-  apply (NoDupAppApp _ (f x) (f y) (flat_map f ys)).
+  apply (NoDupAppR _ (f x) (f y ++ flat_map f ys)).
   assumption.
 Qed.
 
