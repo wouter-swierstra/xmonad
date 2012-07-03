@@ -290,3 +290,11 @@ Proof.
   constructor.
   constructor.
 Admitted.
+
+Lemma HdTlNotNil (a : Type) (x : a) (xs : list a) : 
+  xs <> nil -> hd x xs :: (tl xs) = xs.
+Proof.
+  intros F; induction xs.
+    exfalso; apply F; reflexivity.
+    reflexivity.
+  Qed.

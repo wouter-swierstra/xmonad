@@ -6,6 +6,210 @@ Require Import ListLemmas.
 
 Variable (i l a b sd : Set).
 
+Definition invariant (i l a sd : Set) (s : StackSet.stackSet i l a sd) : Prop :=
+  let visibles := map (fun x => getWorkspace x) (getVisible s) in
+  let hiddens := getHidden s in
+  let current := getWorkspace (getCurrent s) in
+  let findStack := fun x => maybe nil (fun s => s :: nil) (getStack x) in
+  let getFocusUpDown := fun t => getFocus t :: getUp t ++ getDown t in
+  let ts := flat_map findStack (current :: visibles ++ hiddens) in
+  NoDup (flat_map getFocusUpDown ts).
+
+Implicit Arguments invariant.
+
+Theorem prop_empty_I (m : l) (wids : {wids : list i | wids <> nil}) 
+  (sds : {sds : list sd | length sds <= length (proj1_sig wids) /\ sds <> nil}) 
+  : invariant (new l m wids sds).
+  Proof.
+    destruct sds as [sds [sdsLength nonNil]]; simpl in sdsLength.
+    induction sds as [ | sd sds].
+    (* Base case *)
+      contradiction nonNil; auto.
+    (* Cons case *)
+      destruct wids as [wds widsProp]; induction wds as [ | wd wds].
+      (* Base case *)
+        simpl in *; absurd (S (length sds) <= 0); auto with arith.
+      (* Cons case *)
+      unfold new, invariant.
+      simpl in *.
+      rewrite FlatMapApp.
+      rewrite FlatMapApp.      
+   Admitted.
+
+Theorem prop_empty (m : l) (wids : {wids : list i | wids <> nil}) 
+  (sds : {sds : list sd | length sds <= length (proj1_sig wids) /\ sds <> nil}) 
+  (eq_a_dec : forall x y, {x = y} + {x <> y}): forall x,
+    ~ (eq_true (StackSet._member eq_a_dec x (new l m wids sds))).
+  Proof.
+    intros x H.
+    destruct wids as [[ | wid wids] NotNilWids];
+      [now (contradiction NotNilWids) | ].
+  destruct sds as [[ | sd sds] [SdsH1 SdsH2]];
+      [now (contradiction SdsH2) | ].
+  simpl in H.
+  Admitted.
+
+Theorem prop_differentiate (xs : list a) :
+  match xs with
+    | nil => differentiate xs = None
+    | x :: xs => differentiate (x :: xs) = Some (Stack nil x xs)
+  end.
+  destruct xs as [ | x xs]; reflexivity.
+  Qed.
+
+Definition hidden_spaces (x : stackSet i l a sd) := map (fun s => getWorkspace s) (getVisible x) ++ getHidden x.
+
+Lemma modify'_getVisible (f : stack a -> stack a) (x : stackSet i l a sd) :
+  getVisible (modify' f x) = getVisible x.
+  Proof.
+  destruct x; destruct getCurrent; destruct getWorkspace.
+  reflexivity.
+  Qed.
+
+Lemma modify'_getHidden (f : stack a -> stack a) (x : stackSet i l a sd) : 
+  getHidden (modify' f x) = getHidden x.
+  Proof.
+  destruct x; destruct getCurrent; destruct getWorkspace; reflexivity.
+  Qed.
+
+Lemma modify'_hidden (f : stack a -> stack a) (x : stackSet i l a sd) : 
+  hidden_spaces (modify' f x) = hidden_spaces x.
+  Proof.
+    unfold hidden_spaces.  
+    rewrite (modify'_getHidden f).
+    rewrite (modify'_getVisible f).
+    reflexivity.
+  Qed.
+
+Lemma modify_getHidden (d : option (stack a)) (f : stack a -> option (stack a)) (x : stackSet i l a sd) : 
+  getHidden (modify d f x) = getHidden x.
+  Proof.
+    destruct x; destruct getCurrent; destruct getWorkspace; reflexivity.
+  Qed.
+
+Lemma modify_getVisible (d : option (stack a)) (f : stack a -> option (stack a)) (x : stackSet i l a sd) : 
+  getVisible (modify d f x) = getVisible x.
+  Proof.
+    destruct x; destruct getCurrent; destruct getWorkspace; reflexivity.
+  Qed.
+
+
+Lemma modify_hidden (d : option (stack a)) (f : stack a -> option
+  (stack a)) (x : stackSet i l a sd) : hidden_spaces (modify d f x) =
+  hidden_spaces x.  
+  Proof.  
+  unfold hidden_spaces.  rewrite (modify_getHidden d f).  rewrite (modify_getVisible d f).
+  reflexivity.  Qed.
+
+Theorem prop_focus_down_local (s : stackSet i l a sd) :
+  hidden_spaces (focusDown s) = hidden_spaces s.
+  Proof.
+  unfold focusDown; rewrite modify'_hidden; reflexivity.
+  Qed.
+
+Theorem prop_focus_up_local (s : stackSet i l a sd) : 
+  hidden_spaces (focusUp s) = hidden_spaces s.
+  Proof.
+  unfold focusUp; rewrite modify'_hidden; reflexivity.
+  Qed.
+
+Theorem prop_focus_master_local (s : stackSet i l a sd) :
+  hidden_spaces (focusMaster s) = hidden_spaces s.
+  Proof.
+    unfold focusMaster; rewrite modify'_hidden; reflexivity.
+  Qed.
+
+Lemma stackSet_eq (x y : stackSet i l a sd) :
+  (getCurrent x = getCurrent y) ->
+  (getVisible x = getVisible y) ->
+  (getHidden x = getHidden y) ->
+  (getFloating x = getFloating y) ->
+  x = y.
+  Proof.
+    intros H1 H2 H3 H4.
+    destruct x. simpl in *.
+    rewrite H1, H2, H3, H4.
+    destruct y; reflexivity.
+  Qed.
+
+Lemma screen_eq (x y : screen i l a sd ) : 
+  (getWorkspace x = getWorkspace y) ->
+  (getScreen x = getScreen y) ->
+  (getScreenDetail x = getScreenDetail y) ->
+  x = y.
+  Proof.
+    intros H1 H2 H3; destruct x; simpl in *; rewrite H1, H2, H3; destruct y; reflexivity.
+  Qed.
+
+Lemma workspace_eq (x y : workspace i l a) :
+  (getTag x = getTag y) ->
+  (getLayout x = getLayout y) ->
+  (getStack x = getStack y) ->
+  x = y.
+  Proof.
+    intros H1 H2 H3; destruct x; simpl in *; rewrite H1, H2, H3; destruct y; reflexivity.
+  Qed.
+
+Theorem prop_delete_local (s : stackSet i l a sd) (eq_dec : forall x y, {x = y} + {x <> y}) :
+  match peek s with
+    | None => True
+    | Some i => hidden_spaces s = hidden_spaces (_delete eq_dec i s)
+  end.
+  Proof.
+  remember (peek s). 
+  destruct o as [x | ]; [ | trivial].
+  unfold _delete.
+  unfold sink.
+  unfold _delete'.
+  destruct s.
+  destruct getCurrent.
+  f_equal.
+  destruct getWorkspace.
+  apply stackSet_eq.
+  simpl in *.
+  apply screen_eq.
+  simpl.
+  apply workspace_eq; try reflexivity.
+  destruct getStack.
+  unfold peek in Heqo.
+  unfold withStack in Heqo.
+  simpl in *.
+  unfold filterStack.
+  unfold getFocus in Heqo.
+  destruct s.
+  injection Heqo.
+  intros Eq.
+  rewrite <- Eq in *.
+  simpl.
+  assert (negb (proj1_sig (beqa eq_dec x x)) = false).
+  generalize (beqa eq_dec x x).
+  destruct s.
+  Admitted.
+
+Theorem prop_swap_master_local (s : stackSet i l a sd) : 
+  hidden_spaces s = hidden_spaces (swapMaster s).
+  Proof.
+    unfold swapMaster; rewrite modify'_hidden; reflexivity.
+  Qed.    
+
+Theorem prop_swap_left_local (s : stackSet i l a sd) : 
+  hidden_spaces s = hidden_spaces (swapUp s).
+  Proof.
+    unfold swapUp; rewrite modify'_hidden; reflexivity.
+  Qed.    
+
+Theorem prop_swap_right_local (s : stackSet i l a sd) : 
+  hidden_spaces s = hidden_spaces (swapDown s).
+  Proof.
+    unfold swapDown; rewrite modify'_hidden; reflexivity.
+  Qed.    
+
+Theorem prop_shift_master_local (s : stackSet i l a sd) : 
+  hidden_spaces s = hidden_spaces (shiftMaster s).
+  Proof.
+    unfold shiftMaster; rewrite modify'_hidden; reflexivity.
+  Qed.
+
 Lemma focusUpDown' (s : stack a) :
   focusDown' (focusUp' s) = s.
   Proof.
@@ -108,63 +312,48 @@ Theorem prop_swap_master_idempotent (x : StackSet.stackSet i l a sd) :
     destruct ls; auto.
   Qed.
 
-Definition hidden_spaces (x : StackSet.stackSet i l a sd) : list (StackSet.workspace i l a) :=
-  map (fun x => StackSet.getWorkspace x) (StackSet.getVisible x) ++ (StackSet.getHidden x).
 
-Theorem prop_swap_master_local (x : StackSet.stackSet i l a sd) :
-  hidden_spaces (StackSet.swapMaster x) = hidden_spaces x.
+Theorem prop_screens_work (x : stackSet i l a sd) :
+  screens x = getCurrent x :: getVisible x.
   Proof.
-    destruct x.
-    unfold StackSet.swapMaster, StackSet.modify', StackSet.modify, StackSet.withStack.
-    destruct getCurrent; destruct getWorkspace.
-    unfold hidden_spaces; reflexivity.
+    destruct x; unfold screens; reflexivity.
   Qed.
 
-Theorem prop_swap_left_local  (x : StackSet.stackSet i l a sd) :
-  hidden_spaces (StackSet.swapUp x) = hidden_spaces x.
+Theorem prop_mapWorkspaceId (x : stackSet i l a sd) : 
+  mapWorkspace (fun y => y) x = x.
   Proof.
+    unfold mapWorkspace.
     destruct x.
-    unfold StackSet.swapUp, StackSet.modify', StackSet.modify, StackSet.withStack.
-    destruct getCurrent; destruct getWorkspace.
-    unfold hidden_spaces; reflexivity.
+    destruct getCurrent.
+    rewrite map_id.
+    replace (map (fun scr => match scr with
+                               | {| getWorkspace := w; getScreen := s; getScreenDetail := sd0 |} =>
+                                 {| getWorkspace := w; getScreen := s; getScreenDetail := sd0 |}
+                             end)
+                 getVisible)
+      with getVisible.
+    reflexivity.
+    induction getVisible; [ reflexivity | ].
+    simpl; rewrite <- IHgetVisible; destruct a0; reflexivity.
   Qed.
 
-Theorem prop_swap_right_local (x : StackSet.stackSet i l a sd) :
-  hidden_spaces (StackSet.swapDown x) = hidden_spaces x.
-  Proof.
-    destruct x.
-    unfold StackSet.swapDown, StackSet.modify', StackSet.modify, StackSet.withStack.
-    destruct getCurrent; destruct getWorkspace.
-    unfold hidden_spaces; reflexivity.
-  Qed.
+Require Import Coq.Program.Equality.
 
-Theorem prop_focus_master_local (x : StackSet.stackSet i l a sd) :
-  hidden_spaces x = hidden_spaces (StackSet.focusMaster x).
-  Proof.
-    destruct x.
-    unfold StackSet.focusMaster.
-    unfold StackSet.modify', StackSet.modify.
-    destruct getCurrent; destruct getWorkspace.
-    unfold hidden_spaces; reflexivity.
-  Qed.
-  
 Theorem prop_focusMaster_idem (x : StackSet.stackSet i l a sd) :
   StackSet.focusMaster (StackSet.focusMaster x) = StackSet.focusMaster x.
   Proof.
     destruct x.
     unfold StackSet.focusMaster.
-    destruct getCurrent; destruct getWorkspace; destruct getStack; auto.
-    destruct s as [ls c rs]; simpl.
-    unfold StackSet.withStack.
+    unfold modify', modify, withStack.
     simpl.
-    do 3 repeat f_equal.
-    destruct ls as [ | l ls]; auto.
-    assert (exists x, exists xs, rev ls ++ l :: nil = x :: xs).
-    destruct (rev ls) as [ | y ys].
-    exists l; exists nil; auto.
-    exists y; exists (ys ++ l :: nil); auto.
-    destruct H as [x [xs Eq]].
-    (* rewrite Eq at 1. *)
+    destruct getCurrent; destruct getWorkspace; destruct getStack; try reflexivity.
+    destruct s as [ls c rs].
+    apply stackSet_eq; try reflexivity.
+    apply screen_eq; try reflexivity.
+    apply workspace_eq; try reflexivity.
+    simpl.
+    destruct ls; try reflexivity.
+    (* destruct (rev ls ++ a0 :: nil). *)
   Admitted.
 
 Fixpoint concat (a : Set) (xss : list (list a)) : list a :=
@@ -173,22 +362,23 @@ Fixpoint concat (a : Set) (xss : list (list a)) : list a :=
     | xs :: xss => xs ++ concat a xss
   end.
 
-Definition invariant (i l a sd : Set) (s : StackSet.stackSet i l a sd) : Prop :=
-  let visibles := map (fun x => getWorkspace x) (getVisible s) in
-  let hiddens := getHidden s in
-  let current := getWorkspace (getCurrent s) in
-  let findStack := fun x => maybe nil (fun s => s :: nil) (getStack x) in
-  let getFocusUpDown := fun t => getFocus t :: getUp t ++ getDown t in
-  let ts := flat_map findStack (current :: visibles ++ hiddens) in
-  NoDup (flat_map getFocusUpDown ts).
-
-Implicit Arguments invariant.
-
 Lemma PermutationRotate (xs : list a) : Permutation xs (rotate xs).
   induction xs; [constructor | ].
   apply Permutation_cons_app; rewrite app_nil_r; auto.
   Qed.
   
+
+Theorem prop_insert_local (x : stackSet i l a sd) (eq_dec : forall x y, {x = y} + {x <> y}) :
+  forall i, ~(eq_true (_member eq_dec i x)) -> hidden_spaces x = hidden_spaces (_insertUp eq_dec i x).
+  Proof.
+    intros y H.
+    unfold _insertUp.
+    destruct (_member eq_dec y x).
+    reflexivity.
+    rewrite modify_hidden.
+    reflexivity.
+  Qed.
+
 Theorem prop_swap_master_I (s : StackSet.stackSet i l a sd) :
   invariant s -> invariant (swapMaster s).
   Proof.
@@ -204,22 +394,6 @@ Theorem prop_swap_master_I (s : StackSet.stackSet i l a sd) :
       [ apply Permutation_rev | apply PermutationRotate].
   Qed.
 
-Theorem prop_empty_I (m : l) (wids : {wids : list i | wids <> nil}) 
-  (sds : {sds : list sd | length sds <= length (proj1_sig wids) /\ sds <> nil}) 
-  : invariant (new l m wids sds).
-  Proof.
-    destruct sds as [sds [sdsLength nonNil]]; simpl in sdsLength.
-    induction sds as [ | sd sds].
-    (* Base case *)
-      contradiction nonNil; auto.
-    (* Cons case *)
-      destruct wids as [wds widsProp]; induction wds as [ | wd wds].
-      (* Base case *)
-        simpl in *; absurd (S (length sds) <= 0); auto with arith.
-      (* Cons case *)
-        unfold invariant in *; simpl in *.
-   Admitted.
-
 Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
   invariant s -> invariant (_view eq_nat_dec n s).
   Proof.
@@ -228,26 +402,40 @@ Theorem prop_view_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) 
     case (find (fun y  => proj1_sig (beqi eq_nat_dec n (getTag (getWorkspace y))))
          (getVisible s)).
     destruct s.
-    unfold invariant; simpl.
     intros s H1 H2.
-    apply (NoDupFlatMap _ _ _ _ _ H2).
 Admitted.
 
+Lemma invariant_lemma : forall (i l a sd : Set) (v v' : list (screen i l a sd)) (h h' : list (workspace i l a)) c f,
+  Permutation v v' ->
+  Permutation h h' ->
+  invariant (StackSet c v h f) ->
+  invariant (StackSet c v' h' f).
+  Proof.  
+    intros i l a sd v v' h h' c f Pv Ph.
+    unfold invariant.
+    intros I. apply (NoDupPerm _ _ _ I).
+    simpl in *.
+    apply PermutationFlatMap.
+    apply Permutation_app.
+    apply Permutation_refl.
+    apply PermutationFlatMap.
+    apply Permutation_app.
+    apply Permutation_map.
+    assumption.
+    assumption.
+  Qed.
 Theorem prop_greedyView_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
   invariant s -> invariant (_greedyView eq_nat_dec n s).
   Proof.
     unfold _greedyView.
-    case (existsb (fun x => proj1_sig (beqi eq_nat_dec n (getTag x))) (getHidden s)).
+    destruct (existsb (fun x => proj1_sig (beqi eq_nat_dec n (getTag x))) (getHidden s)).
     apply prop_view_I.
-    case (find (fun x => proj1_sig 
+    destruct (find (fun x => proj1_sig 
                  (beqi eq_nat_dec n (getTag (getWorkspace x))))
                  (getVisible s)); auto.
-    destruct s. destruct s.
-    destruct getVisible.
-    unfold invariant.
-    simpl; intros H.
-    apply (NoDupFlatMap _ _ _ _ _ H).
-    apply Permutation_app_head.
+    destruct s. destruct s0.
+    apply invariant_lemma; try apply Permutation_refl.
+    simpl.
   Admitted.
 
 Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
@@ -258,8 +446,148 @@ Theorem prop_focusUp_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a s
     cut (invariant (focusUp s)).
     intro H; apply (IHn _ H).
     unfold invariant in *; simpl in *.
-    apply (NoDupFlatMap _ _ _ _ _ IHs).
-  Admitted.
+    rewrite FlatMapApp.
+    apply (NoDupPerm _ _ _ IHs).
+    rewrite FlatMapApp in *.
+    apply (Permutation_app).
+    destruct s.
+    destruct getCurrent.
+    destruct getWorkspace.
+    destruct getStack.
+    simpl.
+    unfold focusUp'.
+    destruct s.
+    destruct getUp.
+    simpl.
+    repeat rewrite (app_nil_r).
+    destruct getDown.
+    apply (Permutation_refl).
+    simpl.
+    Focus 2.
+    repeat rewrite (app_nil_r).
+    simpl.
+    apply (Permutation_trans (l' := a0 :: getFocus :: getUp ++ getDown)).
+    constructor.
+    constructor.
+    apply (Permutation_cons_app).
+    apply Permutation_refl.
+    simpl.
+    replace (hd getFocus (rev getDown ++ a0 :: nil)
+      :: tl ((rev getDown ++ a0 :: nil) ++ getFocus :: nil))
+      with
+        (((hd getFocus (rev getDown ++ a0 :: nil)
+      :: tl ((rev getDown ++ a0 :: nil))) ++ getFocus :: nil)).
+    rewrite HdTlNotNil.
+    apply Permutation_cons_app.
+    rewrite app_nil_r.
+    apply Permutation_cons_app.
+    rewrite app_nil_r.
+    apply Permutation_rev.
+    destruct getDown.
+      intros F; discriminate F.
+      intros F.
+      refine (app_cons_not_nil (rev (a1 :: getDown)) nil a0 _).
+      symmetry; assumption.
+    simpl. f_equal.
+    destruct (rev getDown); reflexivity.
+    simpl; constructor.
+    apply PermutationFlatMap.
+    apply PermutationFlatMap.
+    apply Permutation_app.
+    apply Permutation_map.
+    destruct s; destruct getVisible; destruct getCurrent; destruct getWorkspace.
+    constructor.
+    apply Permutation_refl.
+    destruct s; destruct getVisible; destruct getCurrent; destruct getWorkspace.
+    apply Permutation_refl.
+    apply Permutation_refl.   
+Qed.    
+
+Theorem prop_focusDown_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
+  invariant s -> invariant (iterate n (focusDown (i:=nat) (l:=l) (a:=a)(sd:=sd)) s).
+  Proof.
+    generalize s; induction n; auto; clear s.
+    intros s IHs; simpl.
+    cut (invariant (focusDown s)).
+    intro H; apply (IHn _ H).
+    unfold invariant in *; simpl in *.
+    rewrite FlatMapApp.
+    apply (NoDupPerm _ _ _ IHs).
+    rewrite FlatMapApp in *.
+    apply (Permutation_app).
+    destruct s; destruct getCurrent; destruct getWorkspace; destruct getStack.
+    simpl.
+    unfold focusDown', focusUp'.
+    destruct s.
+    destruct getUp.
+    simpl.
+    repeat rewrite (app_nil_r).
+    destruct getDown.
+    apply (Permutation_refl).
+    simpl.
+    constructor.
+    repeat rewrite (app_nil_r).
+    simpl.
+    apply (Permutation_trans (l' := a0 :: getFocus :: getUp ++ getDown)).
+    constructor.
+    destruct getDown.
+    simpl.
+    replace (hd getFocus (rev getUp ++ a0 :: nil)
+      :: tl ((rev getUp ++ a0 :: nil) ++ getFocus :: nil))
+      with
+        (((hd getFocus (rev getUp ++ a0 :: nil)
+      :: tl ((rev getUp ++ a0 :: nil))) ++ getFocus :: nil)).
+    rewrite HdTlNotNil.
+    rewrite app_nil_r.
+    rewrite <- app_assoc.
+    simpl.
+    apply Permutation_cons_app.
+    apply Permutation_cons_app.
+    rewrite app_nil_r.
+    apply Permutation_rev.
+    destruct getUp.
+      intros F; discriminate F.
+      intros F.
+      refine (app_cons_not_nil (rev (a1 :: getUp)) nil a0 _).
+      symmetry; assumption.
+    simpl. f_equal.
+    destruct (rev getUp); reflexivity.
+    simpl. 
+    replace (a0 :: getFocus :: getUp ++ a1 :: getDown) with
+      ((a0 :: getFocus :: getUp ++ a1 :: nil) ++ getDown).
+    replace (a1 :: getFocus :: a0 :: getUp ++ getDown) with
+      ((a1 :: getFocus :: a0 :: getUp) ++ getDown).
+    apply Permutation_app_tail.
+    replace (a1 :: getFocus :: a0 :: getUp) with
+      ((a1 :: getFocus :: nil) ++ a0 :: getUp).
+    apply Permutation_cons_app.
+    simpl.
+    apply Permutation_sym. 
+    replace (getFocus :: getUp ++ a1 :: nil) with
+      ((getFocus :: getUp) ++ (a1 :: nil)).
+    apply Permutation_cons_app.
+    rewrite app_nil_r.
+    apply Permutation_refl.
+    reflexivity.
+    reflexivity.
+    reflexivity.
+    simpl.
+    f_equal.
+    f_equal.
+    rewrite <- app_assoc.
+    reflexivity.
+    constructor.
+    apply PermutationFlatMap, PermutationFlatMap. 
+    apply Permutation_app. 
+    apply Permutation_map.
+    destruct s; destruct getVisible; destruct getCurrent; destruct getWorkspace.
+    constructor.
+    apply Permutation_refl.
+    destruct s; destruct getVisible; destruct getCurrent; destruct getWorkspace.
+    apply Permutation_refl.
+    apply Permutation_refl.   
+    Qed.
+    
 
 Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l a sd) :
   invariant s -> invariant (iterate n (focusMaster (i:=nat) (l:=l) (a:=a)(sd:=sd)) s).
@@ -269,111 +597,18 @@ Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l
     cut (invariant (focusMaster st)).
     intro H; apply (IHn _ H).
     unfold invariant in *; simpl in *.
-    apply (NoDupFlatMap _ _ _ _ _ IHs).
+  
+    rewrite FlatMapApp in *.
+    apply (NoDupPerm _ _ _ IHs).
+    apply (Permutation_app).
+    destruct st.
+    destruct getCurrent.
+    destruct getWorkspace.
+    destruct getStack.
+    simpl.
+    destruct s0.
+    destruct getUp.
+    constructor.
+    apply (Permutation_refl).
     Admitted.
 
-      (*
-Remaining QuickCheck properties that have not been verified in Coq:
-        [("StackSet invariants" , mytest prop_invariant)
-        ,("empty is empty"      , mytest prop_empty)
-        ,("empty / current"     , mytest prop_empty_current)
-        ,("empty / member"      , mytest prop_member_empty)
-        ,("view sets current"   , mytest prop_view_current)
-        ,("view idempotent"     , mytest prop_view_idem)
-        ,("view reversible"    , mytest prop_view_reversible)
-        ,("view is local"       , mytest prop_view_local)
-        ,("greedyView : invariant"    , mytest prop_greedyView_I)
-        ,("greedyView sets current"   , mytest prop_greedyView_current)
-        ,("greedyView is safe "   ,   mytest prop_greedyView_current_id)
-        ,("greedyView idempotent"     , mytest prop_greedyView_idem)
-        ,("greedyView reversible"     , mytest prop_greedyView_reversible)
-        ,("greedyView is local"       , mytest prop_greedyView_local)
-        ,("peek/member "        , mytest prop_member_peek)
-        ,("index/length"        , mytest prop_index_length)
-        ,("focus left : invariant", mytest prop_focusUp_I)
-        ,("focus master : invariant", mytest prop_focusMaster_I)
-        ,("focus right: invariant", mytest prop_focusDown_I)
-        ,("focusWindow: invariant", mytest prop_focus_I)
-        ,("focus left/master"   , mytest prop_focus_left_master)
-        ,("focus right/master"  , mytest prop_focus_right_master)
-        ,("focus master/master"  , mytest prop_focus_master_master)
-        ,("focusWindow master"  , mytest prop_focusWindow_master)
-        ,("focus all left  "    , mytest prop_focus_all_l)
-        ,("focus all right "    , mytest prop_focus_all_r)
-        ,("focus down is local"      , mytest prop_focus_down_local)
-        ,("focus up is local"      , mytest prop_focus_up_local)
-        ,("focus master idemp"  , mytest prop_focusMaster_idem)
-        ,("focusWindow is local", mytest prop_focusWindow_local)
-        ,("focusWindow works"   , mytest prop_focusWindow_works)
-        ,("focusWindow identity", mytest prop_focusWindow_identity)
-        ,("findTag"           , mytest prop_findIndex)
-        ,("allWindows/member"   , mytest prop_allWindowsMember)
-        ,("currentTag"          , mytest prop_currentTag)
-        ,("insert: invariant"   , mytest prop_insertUp_I)
-        ,("insert/new"          , mytest prop_insert_empty)
-        ,("insert is idempotent", mytest prop_insert_idem)
-        ,("insert is reversible", mytest prop_insert_delete)
-        ,("insert is local"     , mytest prop_insert_local)
-        ,("insert duplicates"   , mytest prop_insert_duplicate)
-        ,("insert/peek "        , mytest prop_insert_peek)
-        ,("insert/size"         , mytest prop_size_insert)
-        ,("delete: invariant"   , mytest prop_delete_I)
-        ,("delete/empty"        , mytest prop_empty)
-        ,("delete/member"       , mytest prop_delete)
-        ,("delete is reversible", mytest prop_delete_insert)
-        ,("delete is local"     , mytest prop_delete_local)
-        ,("delete/focus"        , mytest prop_delete_focus)
-        ,("delete  last/focus up", mytest prop_delete_focus_end)
-        ,("delete ~last/focus down", mytest prop_delete_focus_not_end)
-        ,("filter preserves order", mytest prop_filter_order)
-        ,("swapMaster: invariant", mytest prop_swap_master_I)
-        ,("swapUp: invariant" , mytest prop_swap_left_I)
-        ,("swapDown: invariant", mytest prop_swap_right_I)
-        ,("swap all left  "     , mytest prop_swap_all_l)
-        ,("swap all right "     , mytest prop_swap_all_r)
-        ,("shiftMaster id on focus", mytest prop_shift_master_focus)
-        ,("shiftMaster is local", mytest prop_shift_master_local)
-        ,("shiftMaster is idempotent", mytest prop_shift_master_idempotent)
-        ,("shiftMaster preserves ordering", mytest prop_shift_master_ordering)
-        ,("shift: invariant"    , mytest prop_shift_I)
-        ,("shift is reversible" , mytest prop_shift_reversible)
-        ,("shiftWin: invariant" , mytest prop_shift_win_I)
-        ,("shiftWin is shift on focus" , mytest prop_shift_win_focus)
-        ,("shiftWin fix current" , mytest prop_shift_win_fix_current)
-        ,("floating is reversible" , mytest prop_float_reversible)
-        ,("floating sets geometry" , mytest prop_float_geometry)
-        ,("floats can be deleted", mytest prop_float_delete)
-        ,("screens includes current", mytest prop_screens)
-        ,("differentiate works", mytest prop_differentiate)
-        ,("lookupTagOnScreen", mytest prop_lookup_current)
-        ,("lookupTagOnVisbleScreen", mytest prop_lookup_visible)
-        ,("screens works",      mytest prop_screens_works)
-        ,("renaming works",     mytest prop_rename1)
-        ,("ensure works",     mytest prop_ensure)
-        ,("ensure hidden semantics",     mytest prop_ensure_append)
-        ,("mapWorkspace id", mytest prop_mapWorkspaceId)
-        ,("mapWorkspace inverse", mytest prop_mapWorkspaceInverse)
-        ,("mapLayout id", mytest prop_mapLayoutId)
-        ,("mapLayout inverse", mytest prop_mapLayoutInverse)
-        ,("abort fails",            mytest prop_abort)
-        ,("new fails with abort",   mytest prop_new_abort)
-        ,("shiftWin identity",      mytest prop_shift_win_indentity)
-        ,("tile 1 window fullsize", mytest prop_tile_fullscreen)
-        ,("tiles never overlap",    mytest prop_tile_non_overlap)
-        ,("split hozizontally",     mytest prop_split_hoziontal)
-        ,("split verticalBy",       mytest prop_splitVertically)
-        ,("pure layout tall",       mytest prop_purelayout_tall)
-        ,("send shrink    tall",    mytest prop_shrink_tall)
-        ,("send expand    tall",    mytest prop_expand_tall)
-        ,("send incmaster tall",    mytest prop_incmaster_tall)
-        ,("pure layout full",       mytest prop_purelayout_full)
-        ,("send message full",      mytest prop_sendmsg_full)
-        ,("describe full",          mytest prop_desc_full)
-        ,("describe mirror",        mytest prop_desc_mirror)
-        ,("window hints: inc",      mytest prop_resize_inc)
-        ,("window hints: inc all",  mytest prop_resize_inc_extra)
-        ,("window hints: max",      mytest prop_resize_max)
-        ,("window hints: max all ", mytest prop_resize_max_extra)
-        ]
-
-*)
