@@ -110,13 +110,23 @@ Proof.
   apply IHPermutation2,IHPermutation1; auto.
 Qed.
 
-Lemma PermApp : forall (a : Type) (xs ys zs : list a),
+Lemma PermAppL : forall (a : Type) (xs ys zs : list a),
   Permutation ys zs -> Permutation (xs ++ ys) (xs ++ zs).
 Proof.
   intros a xs ys zs H1.
   generalize dependent ys.
   generalize dependent zs.
   induction xs; [auto | simpl; auto].
+Qed.
+
+Lemma PermAppR : forall (a : Type) (xs ys zs : list a),
+  Permutation ys zs -> Permutation (ys ++ xs) (zs ++ xs).
+Proof.
+  intros a xs ys zs H.
+  induction xs as [| x xs IHxs].
+  do 2 rewrite -> app_nil_r; apply H.
+  apply Permutation_add_inside. apply H.
+  apply Permutation_refl.  
 Qed.
 
 Lemma NoDupConsSwap : forall (a : Type) (xs : list a) (x y : a),
@@ -136,15 +146,6 @@ Proof.
   rewrite -> app_comm_cons.
   apply NoDupAppAss.
   apply H1.
-Qed.
-
-Lemma NoDupAppConsR' : forall (a : Type) (xs ys : list a) (x y : a),
-  NoDup (x :: xs ++ y :: ys) -> NoDup (x :: xs ++ ys).
-Proof.
-  intros a xs ys x y H.
-  rewrite -> app_comm_cons.
-  apply (NoDupAppConsR _ (x :: xs) ys y).
-  apply H.
 Qed.
 
 Lemma NoDupAppR : forall (a : Type) (xs ys : list a),
@@ -167,14 +168,8 @@ Lemma NoDupAppL : forall (a : Type) (xs ys : list a),
   NoDup (xs ++ ys) -> NoDup xs.
 Proof.
   intros a xs ys H.
-  generalize dependent xs.
-  induction ys as [| y ys IHys].
-  destruct xs as [| x xs].
-  intros H; apply H.
-  intros H; rewrite -> app_nil_r in H; apply H.
-  intros xs H.
-  apply IHys.
-  apply (NoDupAppConsR _ xs ys y).
+  apply NoDupAppAss in H.
+  apply (NoDupAppR _ ys xs).
   apply H.
 Qed.
 
@@ -187,23 +182,12 @@ Proof.
   rewrite -> app_ass. reflexivity.
 Qed.
 
-Lemma NoDupAppApp : forall (a : Type) (xs ys zs : list a),
-  NoDup (xs ++ ys ++ zs) -> NoDup (ys ++ zs).
-Proof.
-  intros a xs ys zs H.
-  generalize dependent ys.
-  generalize dependent zs.
-  induction xs as [| x xs IHxs]. simpl; intros; assumption.
-  intros zs ys H. apply IHxs.
-  apply (NoDupCons _ (xs ++ ys ++ zs) x). assumption.
-Qed.
-
 Lemma NoDupFlatMapCons : forall (a b : Type) (x : a) (xs : list a) (f : a -> list b),
   NoDup (flat_map f (x :: xs)) -> NoDup (flat_map f xs).
 Proof.
   intros a b x xs f H.
   destruct xs as [| y ys ]. constructor.
-  apply (NoDupAppApp _ (f x) (f y) (flat_map f ys)).
+  apply (NoDupAppR _ (f x) (f y ++ flat_map f ys)).
   assumption.
 Qed.
 
