@@ -1,4 +1,4 @@
-
+<img src="http://raw.github.com/wouter-swierstra/xmonad/master/bin/logo.png" alt="Logo" style="display:block; margin: 10px auto 30px auto;" class="center">
 
 This repository contains an implementation of xmonad's StackSet module
 in Coq. Extracting Haskell from this Coq file produces a drop-in
@@ -29,9 +29,4 @@ StackSet.v module. The Extraction.v module has various extraction
 commands to generate somewhat palatable Haskell code. Several
 QuickCheck properties have alread been proven in the Properties.v file.
 
-The necessary shell scripts and patches are all in the scripts/ directory.
-
-
-Author:
-
-	Wouter Swierstra
+The necessary shell scripts and patches are all in the scripts/directory.
