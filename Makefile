@@ -228,10 +228,12 @@ quickcheck: integration
 	cd $(XMONADDIR); dist/build/xmonad/xmonad --run-tests
 
 theorems:
-	@echo 'Total quickcheck properties defined: 111'
-	@echo -n 'Total theorems proven: '
+	@echo -n 'Total theorems stated: '
 	@grep Theorem src/Properties.v | wc -l
-
+	@echo -n 'Total theorems admitted: '
+	@grep Admitted src/Properties.v | wc -l
+	@echo -n 'Remaing theorems: '
+	@wc -l src/properties.txt
 printenv: 
 	@echo CAMLC =	$(CAMLC)
 	@echo CAMLOPTC =	$(CAMLOPTC)

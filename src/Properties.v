@@ -612,3 +612,128 @@ Theorem prop_focusMaster_I (l a sd : Set) (n : nat) (s : StackSet.stackSet nat l
     apply (Permutation_refl).
     Admitted.
 
+Ltac destruct_stackset x := destruct x; destruct getCurrent; destruct getWorkspace; destruct getStack.
+
+Theorem prop_mapLayoutId (s : stackSet i l a sd) :
+  mapLayout (fun x => x) s = s.
+  Proof.
+    destruct s; destruct getCurrent; destruct getWorkspace.
+    apply stackSet_eq; try reflexivity.
+    induction getVisible.
+    reflexivity.
+    simpl in *.
+    destruct a0.
+    destruct getWorkspace.
+    rewrite IHgetVisible.
+    reflexivity.
+    simpl.
+    induction getHidden; try reflexivity.
+    simpl; rewrite IHgetHidden; destruct a0; reflexivity.
+  Qed.
+
+Theorem prop_mapLayoutInverse (s : stackSet i nat a sd) :
+  mapLayout pred (mapLayout S s) = s.
+  Proof.
+    destruct s.
+    simpl.
+    f_equal.
+    destruct getCurrent.
+    f_equal.
+    destruct getWorkspace.
+    reflexivity.
+    induction getVisible.
+    reflexivity.
+    destruct a0.
+    simpl.
+    rewrite IHgetVisible.
+    destruct getWorkspace.
+    reflexivity.
+    induction getHidden; try reflexivity.
+    destruct a0; simpl; rewrite IHgetHidden; reflexivity.
+  Qed.
+
+Definition predTag (w : workspace nat l a) : workspace nat l a :=
+  match w with
+    | Workspace t l s => Workspace (pred t) l s
+  end.
+
+Definition succTag (w : workspace nat l a) : workspace nat l a :=
+  match w with
+    | Workspace t l s => Workspace (S t) l s
+  end.
+
+Theorem prop_mapWorkspaceInverse (s : stackSet nat l a sd) :
+  mapWorkspace predTag (mapWorkspace succTag s) = s.
+  Proof.
+    destruct s; destruct getCurrent; destruct getWorkspace.
+    unfold mapWorkspace.
+    f_equal.
+    induction getVisible; try reflexivity.
+    simpl; destruct a0; rewrite IHgetVisible; unfold predTag; unfold succTag; simpl. 
+    destruct getWorkspace. reflexivity.
+    induction getHidden; try reflexivity.
+    destruct a0.
+    simpl. rewrite IHgetHidden.
+    reflexivity.
+  Qed.
+
+Theorem prop_screens (s : stackSet i l a sd) :
+  In (getCurrent s) (screens s).
+  Proof.
+    destruct s.
+    destruct getCurrent; left; reflexivity.
+  Qed.
+
+Theorem prop_lookup_current (x : stackSet i l a sd) :
+  lookupWorkspace (getScreen (getCurrent x)) x = Some (getTag (getWorkspace (getCurrent x))).
+  Proof.
+    destruct x.
+    destruct getCurrent.
+    simpl.
+    unfold lookupWorkspace.
+    simpl.
+    destruct (beqsid getScreen getScreen) as [b T].
+    destruct b.
+    reflexivity.
+    exfalso; apply T; reflexivity.
+  Qed.
+
+Theorem prop_lookup_visible (x : stackSet i l a sd) : 
+  getVisible x <> nil ->
+  (forall (x y : screen i l a sd), getScreen x = getScreen y -> x = y) -> (* the StackSet invariant *)
+  match last (map (fun x => Some (getScreen x)) (getVisible x)) None with
+    | None => True
+    | Some sc =>
+      In (lookupWorkspace sc x) (map (fun x => Some (getTag (getWorkspace x))) (getVisible x))
+  end.
+  Proof.
+    remember (last (map (fun x => Some (getScreen x)) (getVisible x)) None).
+    destruct y; try trivial.
+    intros F; induction getVisible as [ | y ys].
+    exfalso; apply F; reflexivity.
+    induction ys as [ | z zs].
+    left.
+    destruct x.
+    unfold lookupWorkspace.
+    simpl.
+    injection Heqy.
+    intros Eq.
+    rewrite Eq.
+    destruct (beqsid (getScreen y) (getScreen getCurrent)) as [b B].
+    destruct b; simpl in *.
+    rewrite (H _ _ B).
+    destruct getCurrent; reflexivity.
+    Focus 2.
+    intros H.
+    right.
+    apply IHys.
+    assumption.
+    discriminate.
+    assumption.
+    destruct y.
+    simpl in *.
+    destruct getCurrent.
+    simpl in *.
+  Admitted.
+
+
