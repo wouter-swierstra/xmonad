@@ -1,4 +1,3 @@
-<img src="https://github.com/wouter-swierstra/xmonad/raw/master/bin/logo.png" alt="Logo" style="display:block; margin: 10px auto 30px auto;" class="center">
 
 This repository contains an implementation of xmonad's StackSet module
 in Coq. Extracting Haskell from this Coq file produces a drop-in
